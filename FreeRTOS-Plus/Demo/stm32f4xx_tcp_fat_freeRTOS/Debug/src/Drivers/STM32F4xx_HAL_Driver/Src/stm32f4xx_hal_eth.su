@@ -14,7 +14,7 @@ stm32f4xx_hal_eth.c:777:13:HAL_ETH_TxCpltCallback	0	static
 stm32f4xx_hal_eth.c:790:13:HAL_ETH_RxCpltCallback	0	static
 stm32f4xx_hal_eth.c:803:13:HAL_ETH_ErrorCallback	0	static
 stm32f4xx_hal_eth.c:722:6:HAL_ETH_IRQHandler	16	static
-stm32f4xx_hal_eth.c:822:19:HAL_ETH_ReadPHYRegister	16	static
+stm32f4xx_hal_eth.c:822:19:HAL_ETH_ReadPHYRegister	24	static
 stm32f4xx_hal_eth.c:908:19:HAL_ETH_WritePHYRegister	16	static
 stm32f4xx_hal_eth.c:1013:19:HAL_ETH_Start	32	static
 stm32f4xx_hal_eth.c:1052:19:HAL_ETH_Stop	32	static

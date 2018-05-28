@@ -339,7 +339,7 @@ HAL_StatusTypeDef hal_eth_init_status;
 		by the peripheral. */
 		xETH.Init.ChecksumMode = ETH_CHECKSUM_BY_HARDWARE;
 
-		xETH.Init.MediaInterface = ETH_MEDIA_INTERFACE_MII;
+		xETH.Init.MediaInterface = ETH_MEDIA_INTERFACE_RMII;
 		hal_eth_init_status = HAL_ETH_Init( &xETH );
 
 		/* Only for inspection by debugger. */

@@ -155,6 +155,7 @@
   */
 /* #define USE_FULL_ASSERT    1 */
 
+
 /* ################## Ethernet peripheral configuration ##################### */
 
 /* Section 1 : Ethernet peripheral configuration */
@@ -183,8 +184,8 @@
 /* PHY Configuration delay */
 #define PHY_CONFIG_DELAY                ((uint32_t)0x00000FFF)
 
-#define PHY_READ_TO                     ((uint32_t)0x0000FFFF)
-#define PHY_WRITE_TO                    ((uint32_t)0x0000FFFF)
+#define PHY_READ_TO                     ((uint32_t)0x0004FFFF)
+#define PHY_WRITE_TO                    ((uint32_t)0x0004FFFF)
 
 /* Section 3: Common PHY Registers */
 

@@ -209,7 +209,7 @@ HAL_StatusTypeDef HAL_ETH_Init(ETH_HandleTypeDef *heth)
 	__HAL_RCC_SYSCFG_CLK_ENABLE();
 
 	/* Select MII or RMII Mode*/
-	SYSCFG->PMC |= SYSCFG_PMC_MII_RMII_SEL;//选择RMII接口
+	SYSCFG->PMC &= ~(SYSCFG_PMC_MII_RMII_SEL);
 	SYSCFG->PMC |= (uint32_t)heth->Init.MediaInterface;
 
 	/* Ethernet Software reset */

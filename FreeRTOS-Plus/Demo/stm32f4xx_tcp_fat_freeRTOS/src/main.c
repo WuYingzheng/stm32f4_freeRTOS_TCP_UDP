@@ -103,7 +103,6 @@
 /* ST includes. */
 #include "stm32f4xx_hal.h"
 
-
 /* Set the following constants to 1 or 0 to define which tasks to include and
 exclude.  A WIDER RANGE OF EXAMPLES ARE AVAILABLE IN THE WIN32 DEMO:
 http://www.freertos.org/FreeRTOS-Plus/FreeRTOS_Plus_TCP/examples_FreeRTOS_simulator.html
@@ -136,8 +135,8 @@ FreeRTOS+TCP using a tool such as EchoTool https://github.com/PavelBansky/EchoTo
 (a pre-built binary is available).
 See http://www.freertos.org/FreeRTOS-Plus/FreeRTOS_Plus_TCP/TCP_Echo_Server.html
 */
-#define mainCREATE_FTP_SERVER					1
-#define mainCREATE_HTTP_SERVER 					1
+#define mainCREATE_FTP_SERVER					0
+#define mainCREATE_HTTP_SERVER 					0
 #define mainCREATE_UDP_CLI_TASKS				1
 #define mainCREATE_TCP_ECHO_CLIENT_TASKS_SINGLE	1
 #define mainCREATE_SIMPLE_TCP_ECHO_SERVER		1
@@ -605,13 +604,16 @@ GPIO_InitTypeDef GPIO_InitStruct;
 	prvConfigureClocks();
 
 	/* GPIO Ports Clock Enable */
+	__GPIOA_CLK_ENABLE();
+	__GPIOG_CLK_ENABLE();
+	__GPIOD_CLK_ENABLE();
 	__GPIOE_CLK_ENABLE();
 	__GPIOF_CLK_ENABLE();
 	__GPIOH_CLK_ENABLE();
 	__GPIOB_CLK_ENABLE();
 	__GPIOC_CLK_ENABLE();
 
-	/* Configure GPIO pins : PE2 PE5 PE6 */
+	/* Configure GPIO pins : PE2 PE5 PE6 和JLink相关*/
 	GPIO_InitStruct.Pin = GPIO_PIN_2|GPIO_PIN_5|GPIO_PIN_6;
 	GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
@@ -619,7 +621,7 @@ GPIO_InitTypeDef GPIO_InitStruct;
 	GPIO_InitStruct.Alternate = GPIO_AF0_TRACE;
 	HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
-	/*Configure GPIO pins : PG12 PG8 PG6 (LED). */
+	/*Configure GPIO pins : PG12 PG8 PG6 (LED已经ok). */
 	GPIO_InitStruct.Pin = GPIO_PIN_9|GPIO_PIN_10;
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStruct.Pull = GPIO_PULLUP;
@@ -901,37 +903,41 @@ GPIO_InitTypeDef GPIO_InitStruct;
 
 		/**ETH GPIO Configuration
 		Please check Ethernet GPIO's with the hardware manual
-		PA1     ------> ETH_RX_CLK
-		PA2     ------> ETH_MDIO
-		PA7     ------> ETH_RX_DV
-		PA8	    ------> MCO
+	**	PA1     ------> ETH_RX_CLK
+	**	PA2     ------> ETH_MDIO
+	**	PA7     ------> ETH_RX_DV
+	//	PA8	    ------> MCO MCU时钟输出，开发板使用外部时钟，50MHz
 
 		PB5     ------> ETH_PPS_OUT
-		PB8     ------> ETH_TXD3
+	//	PB8     ------> ETH_TXD3
 
-		PC1     ------> ETH_MDC
-		PC2     ------> ETH_TXD2
-		PC3     ------> ETH_TX_CLK
-		PC4     ------> ETH_RXD0
-		PC5     ------> ETH_RXD1
+	**	PC1     ------> ETH_MDC
+	//	PC2     ------> ETH_TXD2
+	//	PC3     ------> ETH_TX_CLK
+	**	PC4     ------> ETH_RXD0
+	**	PC5     ------> ETH_RXD1
 
-		PG14     ------> ETH_TXD1
-		PG13     ------> ETH_TXD0
-		PG11     ------> ETH_TX_EN
+	**	PG14     ------> ETH_TXD1
+	**	PG13     ------> ETH_TXD0
+	**	PG11     ------> ETH_TX_EN
 
-		PH2     ------> ETH_CRS
-		PH3     ------> ETH_COL
-		PH6     ------> ETH_RXD2
-		PH7     ------> ETH_RXD3
+	//	PH2     ------> ETH_CRS
+	//	PH3     ------> ETH_COL
+	//	PH6     ------> ETH_RXD2
+	//	PH7     ------> ETH_RXD3
 
-		PI10     ------> ETH_RX_ER
+	//	PI10     ------> ETH_RX_ER 悬空
 		*/
-		GPIO_InitStruct.Pin = GPIO_PIN_8 | GPIO_PIN_5;
-		GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-		GPIO_InitStruct.Pull = GPIO_NOPULL;
-		GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
-		GPIO_InitStruct.Alternate = GPIO_AF11_ETH;
-		HAL_GPIO_Init( GPIOB, &GPIO_InitStruct );
+
+		  /* Enable SYSCFG clock */
+	//RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE); //协议栈移植层有
+
+	//	GPIO_InitStruct.Pin = GPIO_PIN_8 | GPIO_PIN_5;
+	//	GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+	//	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	//	GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
+	//	GPIO_InitStruct.Alternate = GPIO_AF11_ETH;
+	//	HAL_GPIO_Init( GPIOB, &GPIO_InitStruct );
 
 		GPIO_InitStruct.Pin = GPIO_PIN_14 | GPIO_PIN_13 | GPIO_PIN_11;
 		GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
@@ -940,21 +946,21 @@ GPIO_InitTypeDef GPIO_InitStruct;
 		GPIO_InitStruct.Alternate = GPIO_AF11_ETH;
 		HAL_GPIO_Init( GPIOG, &GPIO_InitStruct );
 
-		GPIO_InitStruct.Pin = GPIO_PIN_10;
-		GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-		GPIO_InitStruct.Pull = GPIO_NOPULL;
-		GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
-		GPIO_InitStruct.Alternate = GPIO_AF11_ETH;
-		HAL_GPIO_Init( GPIOI, &GPIO_InitStruct );
+//		GPIO_InitStruct.Pin = GPIO_PIN_10;
+//		GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+//		GPIO_InitStruct.Pull = GPIO_NOPULL;
+//		GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
+//		GPIO_InitStruct.Alternate = GPIO_AF11_ETH;
+//		HAL_GPIO_Init( GPIOI, &GPIO_InitStruct );
 
-		GPIO_InitStruct.Pin = GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_6 | GPIO_PIN_7;
-		GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-		GPIO_InitStruct.Pull = GPIO_NOPULL;
-		GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
-		GPIO_InitStruct.Alternate = GPIO_AF11_ETH;
-		HAL_GPIO_Init( GPIOH, &GPIO_InitStruct );
+	//	GPIO_InitStruct.Pin = GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_6 | GPIO_PIN_7;
+	//	GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+	//	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	//	GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
+	//	GPIO_InitStruct.Alternate = GPIO_AF11_ETH;
+	//	HAL_GPIO_Init( GPIOH, &GPIO_InitStruct );
 
-		GPIO_InitStruct.Pin = GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_4 | GPIO_PIN_5;
+		GPIO_InitStruct.Pin = GPIO_PIN_1  | GPIO_PIN_4 | GPIO_PIN_5;
 		GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
 		GPIO_InitStruct.Pull = GPIO_NOPULL;
 		GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
@@ -968,12 +974,19 @@ GPIO_InitTypeDef GPIO_InitStruct;
 		GPIO_InitStruct.Alternate = GPIO_AF11_ETH;
 		HAL_GPIO_Init( GPIOA, &GPIO_InitStruct );
 
-		GPIO_InitStruct.Pin = GPIO_PIN_8;
+		GPIO_InitStruct.Pin = GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_7;
 		GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
 		GPIO_InitStruct.Pull = GPIO_NOPULL;
 		GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
-		GPIO_InitStruct.Alternate = GPIO_AF0_MCO;
+		GPIO_InitStruct.Alternate = GPIO_AF11_ETH;
 		HAL_GPIO_Init( GPIOA, &GPIO_InitStruct );
+
+//		GPIO_InitStruct.Pin = GPIO_PIN_8;
+//		GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+//		GPIO_InitStruct.Pull = GPIO_NOPULL;
+//		GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
+//		GPIO_InitStruct.Alternate = GPIO_AF0_MCO;
+//		HAL_GPIO_Init( GPIOA, &GPIO_InitStruct );
 
 		HAL_NVIC_SetPriority( ETH_IRQn, configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY, 0 );
 		HAL_NVIC_EnableIRQ( ETH_IRQn );
