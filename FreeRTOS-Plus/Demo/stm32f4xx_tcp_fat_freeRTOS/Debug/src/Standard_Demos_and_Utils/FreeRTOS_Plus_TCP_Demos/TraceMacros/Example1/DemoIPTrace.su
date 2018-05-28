@@ -1,0 +1,4 @@
+DemoIPTrace.c:193:13:prvIncrementEventCount	0	static
+DemoIPTrace.c:203:13:prvStoreLowest	0	static
+DemoIPTrace.c:160:12:xExampleDebugStatEntries	0	static
+DemoIPTrace.c:167:6:vExampleDebugStatUpdate	8	static

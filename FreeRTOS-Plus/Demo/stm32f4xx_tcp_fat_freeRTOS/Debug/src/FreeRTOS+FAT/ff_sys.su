@@ -1,0 +1,6 @@
+ff_sys.c:84:5:FF_FS_Count	0	static
+ff_sys.c:90:6:FF_FS_Init	0	static
+ff_sys.c:103:5:FF_FS_Add	32	static
+ff_sys.c:169:6:FF_FS_Remove	32	static
+ff_sys.c:205:5:FF_FS_Find	32	static
+ff_sys.c:255:5:FF_FS_Get	8	static

@@ -1,0 +1,4 @@
+FreeRTOS_TCP_server.c:87:14:FreeRTOS_CreateTCPServer	88	static
+FreeRTOS_TCP_server.c:249:6:FreeRTOS_TCPServerWork	64	static
+FreeRTOS_TCP_server.c:339:13:FreeRTOS_TCPServerSignal	8	static
+FreeRTOS_TCP_server.c:363:13:FreeRTOS_TCPServerSignalFromISR	16	static

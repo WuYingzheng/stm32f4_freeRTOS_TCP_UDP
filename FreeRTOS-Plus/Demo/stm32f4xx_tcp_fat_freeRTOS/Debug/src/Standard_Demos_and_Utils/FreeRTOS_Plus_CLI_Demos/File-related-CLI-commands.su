@@ -1,0 +1,9 @@
+File-related-CLI-commands.c:571:19:prvPWDCommand	8	static
+File-related-CLI-commands.c:478:19:prvCOPYCommand	72	static
+File-related-CLI-commands.c:402:19:prvRMDIRCommand	24	static
+File-related-CLI-commands.c:644:13:prvCreateFileInfoString	16	static
+File-related-CLI-commands.c:440:19:prvDELCommand	24	static
+File-related-CLI-commands.c:223:19:prvTYPECommand	32	static
+File-related-CLI-commands.c:297:19:prvCDCommand	24	static
+File-related-CLI-commands.c:335:19:prvDIRCommand	16	static
+File-related-CLI-commands.c:210:6:vRegisterFileSystemCLICommands	8	static

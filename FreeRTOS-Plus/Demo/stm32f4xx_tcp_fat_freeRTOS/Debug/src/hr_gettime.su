@@ -1,0 +1,3 @@
+hr_gettime.c:95:6:TIM2_IRQHandler	0	static
+hr_gettime.c:107:6:vStartHighResolutionTimer	8	static
+hr_gettime.c:131:10:ullGetHighResolutionTime	16	static

@@ -1,0 +1,16 @@
+ff_ioman.c:251:12:FF_DeleteIOManager	8	static
+ff_ioman.c:291:6:FF_IOMAN_InitBufferDescriptors	24	static
+ff_ioman.c:118:17:FF_CreateIOManger	32	static
+ff_ioman.c:562:9:FF_BlockRead	24	static
+ff_ioman.c:609:9:FF_BlockWrite	24	static
+ff_ioman.c:317:12:FF_FlushCache	32	static
+ff_ioman.c:371:14:FF_GetBuffer	48	static
+ff_ioman.c:522:12:FF_ReleaseBuffer	24	static
+ff_ioman.c:841:6:FF_ReadParts	8	static
+ff_ioman.c:1021:12:FF_PartitionSearch	216	static
+ff_ioman.c:1312:12:FF_Mount	56	static
+ff_ioman.c:1589:12:FF_Unmount	16	static
+ff_ioman.c:1666:12:FF_IncreaseFreeClusters	24	static
+ff_ioman.c:1749:12:FF_DecreaseFreeClusters	24	static
+ff_ioman.c:1824:9:FF_GetPartitionBlockSize	0	static
+ff_ioman.c:1850:11:FF_GetVolumeSize	8	static

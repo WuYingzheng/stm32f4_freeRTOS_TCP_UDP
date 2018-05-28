@@ -1,0 +1,4 @@
+ff_string.c:155:7:FF_toupper	8	static
+ff_string.c:173:7:FF_tolower	8	static
+ff_string.c:202:13:FF_strmatch	24	static
+ff_string.c:273:8:FF_strtok	24	static

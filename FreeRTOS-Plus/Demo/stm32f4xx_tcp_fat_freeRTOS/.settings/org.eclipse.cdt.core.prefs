@@ -1,0 +1,6 @@
+eclipse.preferences.version=1
+environment/project/com.atollic.truestudio.exe.debug.404701932/append=true
+environment/project/com.atollic.truestudio.exe.debug.404701932/appendContributed=true
+environment/project/com.atollic.truestudio.exe.debug.404701932/freeRTOS_PATH/delimiter=\:
+environment/project/com.atollic.truestudio.exe.debug.404701932/freeRTOS_PATH/operation=append
+environment/project/com.atollic.truestudio.exe.debug.404701932/freeRTOS_PATH/value=/home/wyz/mcu_devlop/freeRTOS_Labs

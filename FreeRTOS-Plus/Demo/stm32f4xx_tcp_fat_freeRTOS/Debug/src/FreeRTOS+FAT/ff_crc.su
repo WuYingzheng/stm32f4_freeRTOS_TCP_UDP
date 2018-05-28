@@ -1,0 +1,3 @@
+ff_crc.c:114:10:FF_GetCRC32	4	static
+ff_crc.c:213:10:FF_GetCRC16	12	static
+ff_crc.c:275:9:FF_GetCRC8	4	static

@@ -1,0 +1,13 @@
+ff_locking.c:89:12:FF_TrySemaphore	16	static
+ff_locking.c:99:6:FF_PendSemaphore	8	static
+ff_locking.c:106:6:FF_ReleaseSemaphore	8	static
+ff_locking.c:113:6:FF_Sleep	8	static
+ff_locking.c:119:12:FF_CreateEvents	8	static
+ff_locking.c:139:6:FF_LockDirectory	32	static
+ff_locking.c:167:6:FF_UnlockDirectory	8	static
+ff_locking.c:174:5:FF_Has_Lock	16	static
+ff_locking.c:197:6:FF_Assert_Lock	16	static
+ff_locking.c:211:6:FF_LockFAT	32	static
+ff_locking.c:242:6:FF_UnlockFAT	8	static
+ff_locking.c:250:12:FF_BufferWait	16	static
+ff_locking.c:275:6:FF_BufferProceed	8	static

@@ -1,0 +1,6 @@
+Sample-CLI-commands.c:289:20:prvQueryHeapCommand	16	static
+Sample-CLI-commands.c:310:20:prvRunTimeStatsCommand	8	static
+Sample-CLI-commands.c:248:20:prvTaskStatsCommand	8	static
+Sample-CLI-commands.c:400:19:prvParameterEchoCommand	32	static
+Sample-CLI-commands.c:333:19:prvThreeParameterEchoCommand	24	static
+Sample-CLI-commands.c:214:6:vRegisterSampleCLICommands	8	static

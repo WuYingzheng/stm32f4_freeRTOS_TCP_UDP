@@ -1,0 +1,3 @@
+SimpleTCPEchoServer.c:153:13:prvConnectionListeningTask	72	static
+SimpleTCPEchoServer.c:207:13:prvServerConnectionInstance	40	static
+SimpleTCPEchoServer.c:142:6:vStartSimpleTCPServerTasks	16	static

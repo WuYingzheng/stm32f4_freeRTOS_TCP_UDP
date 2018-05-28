@@ -1,0 +1,4 @@
+date_and_time.c:112:8:FreeRTOS_time	0	static
+date_and_time.c:130:6:FreeRTOS_settime	0	static
+date_and_time.c:142:8:FreeRTOS_get_secs_msec	0	static
+date_and_time.c:162:6:FreeRTOS_set_secs_msec	0	static

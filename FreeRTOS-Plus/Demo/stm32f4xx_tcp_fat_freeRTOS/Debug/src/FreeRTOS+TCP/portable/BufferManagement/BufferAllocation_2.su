@@ -1,0 +1,8 @@
+BufferAllocation_2.c:126:12:xNetworkBuffersInitialise	24	static
+BufferAllocation_2.c:186:10:pucGetNetworkBuffer	8	static
+BufferAllocation_2.c:224:6:vReleaseNetworkBuffer	8	static
+BufferAllocation_2.c:330:6:vReleaseNetworkBufferAndDescriptor	8	static
+BufferAllocation_2.c:237:28:pxGetNetworkBufferWithDescriptor	16	static
+BufferAllocation_2.c:365:13:uxGetNumberOfFreeNetworkBuffers	0	static
+BufferAllocation_2.c:371:13:uxGetMinimumFreeNetworkBuffers	0	static
+BufferAllocation_2.c:377:28:pxResizeNetworkBufferWithDescriptor	24	static

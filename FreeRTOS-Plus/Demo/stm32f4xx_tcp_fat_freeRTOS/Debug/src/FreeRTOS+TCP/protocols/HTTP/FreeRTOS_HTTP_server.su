@@ -1,0 +1,5 @@
+FreeRTOS_HTTP_server.c:147:13:prvFileClose	8	static
+FreeRTOS_HTTP_server.c:158:19:prvSendReply	40	static
+FreeRTOS_HTTP_server.c:189:19:prvSendFile	24	static
+FreeRTOS_HTTP_server.c:132:6:vHTTPClientDelete	8	static
+FreeRTOS_HTTP_server.c:352:12:xHTTPClientWork	48	static

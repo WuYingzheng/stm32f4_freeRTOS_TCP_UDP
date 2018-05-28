@@ -1,0 +1,11 @@
+printf-stdarg.c:62:13:strbuf_init	0	static
+printf-stdarg.c:73:19:strbuf_printchar	8	static
+printf-stdarg.c:142:19:prints	24	static
+printf-stdarg.c:295:19:printi	32	static
+stdio.h:244:5:sprintf	52	static
+printf-stdarg.c:399:13:tiny_print	64	static
+printf-stdarg.c:579:5:tiny_printf	48	static
+stdio.h:268:5:vsnprintf	48	static
+stdio.h:266:5:snprintf	48	static
+stdio.h:210:5:vsprintf	48	static
+printf-stdarg.c:641:13:mkSize	24	static

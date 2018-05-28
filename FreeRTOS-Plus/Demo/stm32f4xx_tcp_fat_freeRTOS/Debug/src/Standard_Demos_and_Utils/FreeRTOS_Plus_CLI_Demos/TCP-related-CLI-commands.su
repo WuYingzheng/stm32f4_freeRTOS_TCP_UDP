@@ -1,0 +1,5 @@
+TCP-related-CLI-commands.c:364:19:prvNetStatCommand	16	static
+TCP-related-CLI-commands.c:181:20:prvPingCommand	48	static
+TCP-related-CLI-commands.c:268:20:prvDisplayIPDebugStats	16	static
+TCP-related-CLI-commands.c:304:19:prvDisplayIPConfig	32	static
+TCP-related-CLI-commands.c:158:6:vRegisterTCPCLICommands	8	static

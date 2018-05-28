@@ -1,0 +1,2 @@
+UDPCommandConsole.c:133:6:prvUDPCommandInterpreterTask	80	static
+UDPCommandConsole.c:127:6:vStartUDPCommandInterpreterTask	16	static

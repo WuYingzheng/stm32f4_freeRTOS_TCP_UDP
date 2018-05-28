@@ -1,0 +1,4 @@
+TFTPServer.c:415:6:prvSendAcknowledgement	24	static
+TFTPServer.c:515:13:prvSendTFTPError	40	static
+TFTPServer.c:212:13:prvSimpleTFTPServerTask	104	static
+TFTPServer.c:204:6:vStartTFTPServerTask	16	static

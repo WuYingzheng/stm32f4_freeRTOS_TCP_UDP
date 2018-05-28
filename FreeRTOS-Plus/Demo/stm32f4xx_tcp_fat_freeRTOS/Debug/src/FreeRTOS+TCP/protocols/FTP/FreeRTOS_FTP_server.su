@@ -1,0 +1,13 @@
+FreeRTOS_FTP_server.c:2537:19:prvSendReply	16	static
+FreeRTOS_FTP_server.c:941:19:prvTransferStart	16	static
+FreeRTOS_FTP_server.c:1131:13:prvTransferCloseFile	8	static
+FreeRTOS_FTP_server.c:1429:20:prvStoreFileWork	32	static
+FreeRTOS_FTP_server.c:1047:13:prvTransferCloseSocket	64	static
+FreeRTOS_FTP_server.c:859:19:prvTransferConnect	64	static
+FreeRTOS_FTP_server.c:965:13:prvTransferCheck	56	static
+FreeRTOS_FTP_server.c:407:6:vFTPClientDelete	8	static
+FreeRTOS_FTP_server.c:2594:12:xMakeAbsolute	48	static
+FreeRTOS_FTP_server.c:2378:19:prvSizeDateFile	104	static
+FreeRTOS_FTP_server.c:2070:19:prvChangeDir	32	static
+FreeRTOS_FTP_server.c:2641:12:xMakeRelative	24	static
+FreeRTOS_FTP_server.c:289:12:xFTPClientWork	152	static

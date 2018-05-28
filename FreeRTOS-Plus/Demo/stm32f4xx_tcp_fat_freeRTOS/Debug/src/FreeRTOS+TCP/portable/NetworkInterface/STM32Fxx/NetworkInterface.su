@@ -1,0 +1,10 @@
+NetworkInterface.c:468:19:prvNetworkInterfaceInput	24	static
+NetworkInterface.c:736:13:prvEthernetUpdateConfig	32	static
+NetworkInterface.c:864:13:prvEMACHandlerTask	48	static
+NetworkInterface.c:299:6:HAL_ETH_RxCpltCallback	16	static
+NetworkInterface.c:313:6:HAL_ETH_TxCpltCallback	0	static
+NetworkInterface.c:320:12:xNetworkInterfaceInitialise	24	static
+NetworkInterface.c:396:12:xNetworkInterfaceOutput	16	static
+NetworkInterface.c:562:6:vMACBProbePhy	48	static
+NetworkInterface.c:847:12:xGetPhyLinkStatus	0	static
+NetworkInterface.c:968:6:ETH_IRQHandler	8	static
