@@ -21159,7 +21159,7 @@ uint32_t ulNewBASEPRI;
  8008f86:	681b      	ldr	r3, [r3, #0]
  8008f88:	f013 0fff 	tst.w	r3, #255	; 0xff
  8008f8c:	d0f9      	beq.n	8008f82 <vPortEnterCritical+0x1e>
- 8008f8e:	f44f 71e3 	mov.w	r1, #454	; 0x1c6
+ 8008f8e:	f44f 71e5 	mov.w	r1, #458	; 0x1ca
  8008f92:	4804      	ldr	r0, [pc, #16]	; (8008fa4 <vPortEnterCritical+0x40>)
  8008f94:	f003 f9e4 	bl	800c360 <vAssertCalled>
 }
@@ -21192,7 +21192,7 @@ portFORCE_INLINE static void vPortSetBASEPRI( uint32_t ulNewMaskValue )
  8008fba:	f383 8811 	msr	BASEPRI, r3
  8008fbe:	bd08      	pop	{r3, pc}
 	configASSERT( uxCriticalNesting );
- 8008fc0:	f240 11cd 	movw	r1, #461	; 0x1cd
+ 8008fc0:	f240 11d1 	movw	r1, #465	; 0x1d1
  8008fc4:	4802      	ldr	r0, [pc, #8]	; (8008fd0 <vPortExitCritical+0x28>)
  8008fc6:	f003 f9cb 	bl	800c360 <vAssertCalled>
  8008fca:	e7f1      	b.n	8008fb0 <vPortExitCritical+0x8>
@@ -21328,12 +21328,12 @@ portFORCE_INLINE static void vPortSetBASEPRI( uint32_t ulNewMaskValue )
  80090f0:	2206      	movs	r2, #6
  80090f2:	e00c      	b.n	800910e <xPortStartScheduler+0x66>
 	configASSERT( portCPUID != portCORTEX_M7_r0p1_ID );
- 80090f4:	f44f 71a9 	mov.w	r1, #338	; 0x152
+ 80090f4:	f44f 71ab 	mov.w	r1, #342	; 0x156
  80090f8:	482f      	ldr	r0, [pc, #188]	; (80091b8 <xPortStartScheduler+0x110>)
  80090fa:	f003 f931 	bl	800c360 <vAssertCalled>
  80090fe:	e7da      	b.n	80090b6 <xPortStartScheduler+0xe>
 	configASSERT( portCPUID != portCORTEX_M7_r0p0_ID );
- 8009100:	f240 1153 	movw	r1, #339	; 0x153
+ 8009100:	f240 1157 	movw	r1, #343	; 0x157
  8009104:	482c      	ldr	r0, [pc, #176]	; (80091b8 <xPortStartScheduler+0x110>)
  8009106:	f003 f92b 	bl	800c360 <vAssertCalled>
  800910a:	e7d9      	b.n	80090c0 <xPortStartScheduler+0x18>
@@ -21404,7 +21404,7 @@ portFORCE_INLINE static void vPortSetBASEPRI( uint32_t ulNewMaskValue )
  800918e:	f3bf 8f4f 	dsb	sy
  8009192:	e7fe      	b.n	8009192 <xPortStartScheduler+0xea>
 			configASSERT( ( portMAX_PRIGROUP_BITS - ulMaxPRIGROUPValue ) == configPRIO_BITS );
- 8009194:	f44f 71c2 	mov.w	r1, #388	; 0x184
+ 8009194:	f44f 71c4 	mov.w	r1, #392	; 0x188
  8009198:	4807      	ldr	r0, [pc, #28]	; (80091b8 <xPortStartScheduler+0x110>)
  800919a:	f003 f8e1 	bl	800c360 <vAssertCalled>
  800919e:	e7c6      	b.n	800912e <xPortStartScheduler+0x86>
@@ -21469,12 +21469,12 @@ portFORCE_INLINE static void vPortSetBASEPRI( uint32_t ulNewMaskValue )
  80091ee:	d806      	bhi.n	80091fe <vPortValidateInterruptPriority+0x36>
  80091f0:	bd08      	pop	{r3, pc}
 			configASSERT( ucCurrentPriority >= ucMaxSysCallPriority );
- 80091f2:	f44f 7143 	mov.w	r1, #780	; 0x30c
+ 80091f2:	f44f 7144 	mov.w	r1, #784	; 0x310
  80091f6:	4809      	ldr	r0, [pc, #36]	; (800921c <vPortValidateInterruptPriority+0x54>)
  80091f8:	f003 f8b2 	bl	800c360 <vAssertCalled>
  80091fc:	e7f0      	b.n	80091e0 <vPortValidateInterruptPriority+0x18>
 		configASSERT( ( portAIRCR_REG & portPRIORITY_GROUP_MASK ) <= ulMaxPRIGROUPValue );
- 80091fe:	f44f 7147 	mov.w	r1, #796	; 0x31c
+ 80091fe:	f44f 7148 	mov.w	r1, #800	; 0x320
  8009202:	4806      	ldr	r0, [pc, #24]	; (800921c <vPortValidateInterruptPriority+0x54>)
  8009204:	f003 f8ac 	bl	800c360 <vAssertCalled>
 	}

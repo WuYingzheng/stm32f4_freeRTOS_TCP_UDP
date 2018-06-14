@@ -280,22 +280,27 @@ static void prvTaskExitError( void )
 	for( ;; );
 }
 /*-----------------------------------------------------------*/
-
+/*
+ * 启动第一个任务，触发 SVC 异常后，异常处理函数中直接执行现场恢复， 把 pxCurrentTCB "恢复"到运行状态
+ */
 void vPortSVCHandler( void )
 {
 	__asm volatile (
-					"	ldr	r3, pxCurrentTCBConst2		\n" /* Restore the context. */
-					"	ldr r1, [r3]					\n" /* Use pxCurrentTCBConst to get the pxCurrentTCB address. */
-					"	ldr r0, [r1]					\n" /* The first item in pxCurrentTCB is the task top of stack. */
-					"	ldmia r0!, {r4-r11, r14}		\n" /* Pop the registers that are not automatically saved on exception entry and the critical nesting count. */
-					"	msr psp, r0						\n" /* Restore the task stack pointer. */
-					"	isb								\n"
-					"	mov r0, #0 						\n"
-					"	msr	basepri, r0					\n"
-					"	bx r14							\n"
+					"	ldr	r3, pxCurrentTCBConst2		\n" /* Restore the context. 取 pxCurrentTCB 的地址*/
+					"	ldr r1, [r3]					\n" /* Use pxCurrentTCBConst to get the pxCurrentTCB address. 取出 pxCurrentTCB 的值 ： TCB 地址 */
+					"	ldr r0, [r1]					\n" /* The first item in pxCurrentTCB is the task top of stack. 取出 TCB 第一项 ： 任务的栈顶*/
+					/* Pop the registers that are not automatically saved on exception entry and the critical nesting count.
+					 * 恢复寄存器数据，栈中的数据先弹出到r4，每次传送后r0中的地址增加4*/
+					"	ldmia r0!, {r4-r11, r14}		\n"
+					"	msr psp, r0						\n" /* Restore the task stack pointer. 设置线程栈指针*/
+					"	isb								\n" /*流水线清洗*/
+					"	mov r0, #0 						\n" /*r0寄存器载入立即数0*/
+					"	msr	basepri, r0					\n" //该寄存器最多有9位（由表达优先级的位数决定）。定义了被屏蔽优先级的阈值。当它被设置为某个值后，所有优先级号大于等于此值的中断都被关。
+			                                                //若设置成0，则不关断任何中断，0为默认值。
+					"	bx r14							\n" //跳转到 r14
 					"									\n"
 					"	.align 4						\n"
-					"pxCurrentTCBConst2: .word pxCurrentTCB				\n"
+					"pxCurrentTCBConst2: .word pxCurrentTCB				\n" //label: .word value: places the 4-byte value at the address assigned (by the linker) to label.
 				);
 }
 /*-----------------------------------------------------------*/
