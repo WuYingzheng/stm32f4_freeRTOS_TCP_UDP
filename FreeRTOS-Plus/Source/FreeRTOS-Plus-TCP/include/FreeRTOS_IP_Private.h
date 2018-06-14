@@ -381,7 +381,7 @@ extern const BaseType_t xBufferAllocFixedSize;
 #endif
 
 /* The local IP address is accessed from within xDefaultPartUDPPacketHeader,
-rather than duplicated in its own variable. */
+rather than duplicated in its own variable. */                                             //常量后面加u，表示无符号整形
 #define ipLOCAL_IP_ADDRESS_POINTER ( ( uint32_t * ) &( xDefaultPartUDPPacketHeader.ulWords[ 20u / sizeof(uint32_t) ] ) )
 
 /* The local MAC address is accessed from within xDefaultPartUDPPacketHeader,

@@ -336,7 +336,7 @@ size_t xLength;
 	if( prvInitialiseLogging() != pdFALSE )
 	{
 		va_list args;
-		va_start (args, pcFormatString);
+		va_start (args, pcFormatString);//和可变参数有关的，由编译器实现
 		xLength = prvBufferFormattedString (pcFormatString, args);
 		va_end (args);
 	}

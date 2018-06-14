@@ -334,6 +334,7 @@ static IPTimer_t xARPTimer;
 #endif
 
 /* Set to pdTRUE when the IP task is ready to start processing packets. */
+//全局变量，IP初始化标记
 static BaseType_t xIPTaskInitialised = pdFALSE;
 
 #if( ipconfigCHECK_IP_QUEUE_SPACE != 0 )
@@ -353,7 +354,7 @@ struct freertos_sockaddr xAddress;
 	/* Just to prevent compiler warnings about unused parameters. */
 	( void ) pvParameters;
 
-	/* A possibility to set some additional task properties. */
+	/*没有配置，空函数 A possibility to set some additional task properties. */
 	iptraceIP_TASK_STARTING();
 
 	/* Generate a dummy message to say that the network connection has gone
@@ -810,7 +811,7 @@ const TickType_t xDontBlock = ( TickType_t ) 0;
 		xNetworkDownEventPending = pdFALSE;
 	}
 
-	iptraceNETWORK_DOWN();
+	iptraceNETWORK_DOWN(); //空函数
 }
 /*-----------------------------------------------------------*/
 
@@ -1180,7 +1181,7 @@ void FreeRTOS_SetAddressConfiguration( const uint32_t *pulIPAddress, const uint3
 BaseType_t xSendEventToIPTask( eIPEvent_t eEvent )
 {
 IPStackEvent_t xEventMessage;
-const TickType_t xDontBlock = ( TickType_t ) 0;
+const TickType_t xDontBlock = ( TickType_t ) 0;//意思是阻塞时间为0
 
 	xEventMessage.eEventType = eEvent;
 	xEventMessage.pvData = ( void* )NULL;
@@ -1208,7 +1209,7 @@ BaseType_t xReturn, xSendMessage;
 			if( pxEvent->eEventType == eTCPTimerEvent )
 			{
 				/* TCP timer events are sent to wake the timer task when
-				xTCPTimer has expired, but there is no point sending them if the
+				xTCPTimer has expired 过期, but there is no point sending them if the
 				IP task is already awake processing other message. */
 				xTCPTimer.bExpired = pdTRUE_UNSIGNED;
 
@@ -1305,7 +1306,7 @@ const EthernetHeader_t *pxEthernetHeader;
 	return eReturn;
 }
 /*-----------------------------------------------------------*/
-
+//这个函数初始化了网络接口
 static void prvProcessNetworkDownEvent( void )
 {
 	/* Stop the ARP timer while there is no network. */

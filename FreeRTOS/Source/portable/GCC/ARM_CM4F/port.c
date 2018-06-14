@@ -224,22 +224,29 @@ static void prvTaskExitError( void );
 /*-----------------------------------------------------------*/
 
 /*
- * See header file for description.
+ * 调用函数 prvInitialiseNewTask()
+ *
+ * 作用：给一个新的任务设置栈，然后才能把他置入调度器的控制
+ * StackType_t 无符号32位整型
  */
 StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t pxCode, void *pvParameters )
 {
 	/* Simulate the stack frame as it would be created by a context switch
-	interrupt. */
+	interrupt.
+	在中断上下文切换时，模拟堆栈帧
+	*/
 
 	/* Offset added to account for the way the MCU uses the stack on entry/exit
-	of interrupts, and to ensure alignment. */
+	of interrupts, and to ensure alignment.
+	增加偏移量以说明MCU进出中断的方式，并且确保对齐
+	*/
 	pxTopOfStack--;
 
 	*pxTopOfStack = portINITIAL_XPSR;	/* xPSR */
 	pxTopOfStack--;
 	*pxTopOfStack = ( ( StackType_t ) pxCode ) & portSTART_ADDRESS_MASK;	/* PC */
 	pxTopOfStack--;
-	*pxTopOfStack = ( StackType_t ) portTASK_RETURN_ADDRESS;	/* LR */
+	*pxTopOfStack = ( StackType_t ) portTASK_RETURN_ADDRESS;	/* LR; portTASK_RETURN_ADDRESS被配置为NULL*/
 
 	/* Save code space by skipping register initialisation. */
 	pxTopOfStack -= 5;	/* R12, R3, R2 and R1. */
@@ -255,10 +262,14 @@ StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t px
 	return pxTopOfStack;
 }
 /*-----------------------------------------------------------*/
-
+/*
+ * 调用者 xPortStartScheduler()
+ * 为了阻止任务非法返回，设置无线循环，捕捉错误
+ */
 static void prvTaskExitError( void )
 {
-	/* A function that implements a task must not exit or attempt to return to
+	/*
+	  A function that implements a task must not exit or attempt to return to
 	its caller as there is nothing to return to.  If a task wants to exit it
 	should instead call vTaskDelete( NULL ).
 

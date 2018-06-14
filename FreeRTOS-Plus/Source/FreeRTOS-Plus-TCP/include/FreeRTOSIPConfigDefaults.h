@@ -200,7 +200,7 @@ from the FreeRTOSIPConfig.h configuration header file. */
 #endif
 
 /*
- * FreeRTOS debug logging routine (proposal)
+ * FreeRTOS debug logging routine (proposal 建议书)
  * The macro will be called in the printf() style. Users can define
  * their own logging routine as:
  *

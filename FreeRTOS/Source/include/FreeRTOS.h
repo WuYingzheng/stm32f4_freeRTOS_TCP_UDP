@@ -807,7 +807,7 @@ extern "C" {
 	#define portTICK_TYPE_CLEAR_INTERRUPT_MASK_FROM_ISR( x ) portCLEAR_INTERRUPT_MASK_FROM_ISR( ( x ) )
 #else
 	/* The tick type can be read atomically, so critical sections used when the
-	tick count is returned can be defined away. */
+	tick count is returned can be defined away. 32位的arm处理器读取时间寄存器是一个原子类型的操作，所以不需要进入临界区域*/
 	#define portTICK_TYPE_ENTER_CRITICAL()
 	#define portTICK_TYPE_EXIT_CRITICAL()
 	#define portTICK_TYPE_SET_INTERRUPT_MASK_FROM_ISR() 0

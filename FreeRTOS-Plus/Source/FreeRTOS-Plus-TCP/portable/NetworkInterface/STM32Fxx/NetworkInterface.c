@@ -316,7 +316,7 @@ void HAL_ETH_TxCpltCallback( ETH_HandleTypeDef *heth )
 	zero-copy.  Once they're sent, the buffers must be released. */
 }
 /*-----------------------------------------------------------*/
-
+//这个函数被FreeRTOS_IP.c文件中的函数 static void prvProcessNetworkDownEvent( void ) 调用
 BaseType_t xNetworkInterfaceInitialise( void )
 {
 HAL_StatusTypeDef hal_eth_init_status;
@@ -340,7 +340,7 @@ HAL_StatusTypeDef hal_eth_init_status;
 		xETH.Init.ChecksumMode = ETH_CHECKSUM_BY_HARDWARE;
 
 		xETH.Init.MediaInterface = ETH_MEDIA_INTERFACE_RMII;
-		hal_eth_init_status = HAL_ETH_Init( &xETH );
+		hal_eth_init_status = HAL_ETH_Init( &xETH ); //调用库函数
 
 		/* Only for inspection by debugger. */
 		( void ) hal_eth_init_status;
@@ -363,7 +363,8 @@ HAL_StatusTypeDef hal_eth_init_status;
 		/* Force a negotiation with the Switch or Router and wait for LS. */
 		prvEthernetUpdateConfig( pdTRUE );
 
-		/* The deferred interrupt handler task is created at the highest
+		/* 延期中断函数
+		 * The deferred interrupt handler task is created at the highest
 		possible priority to ensure the interrupt handler can return directly
 		to it.  The task's handle is stored in xEMACTaskHandle so interrupts can
 		notify the task when there is something to process. */

@@ -1,0 +1,8 @@
+OpenWindow="Console", DockArea=BOTTOM, x=0, y=0, w=717, h=125, FilterBarShown=0, 
+OpenWindow="Watched Data", DockArea=RIGHT, x=0, y=1, w=336, h=390, FilterBarShown=0, 
+OpenWindow="Call Stack", DockArea=BOTTOM, x=1, y=0, w=381, h=125, FilterBarShown=0, 
+OpenWindow="Disassembly", DockArea=RIGHT, x=0, y=0, w=336, h=431, FilterBarShown=0, ExecCountersShown=0
+OpenToolbar="Debug", Floating=0, x=0, y=0
+OpenToolbar="Breakpoints", Floating=0, x=1, y=0
+TableHeader="Watched Data", SortCol="Expression", SortOrder="DESCENDING", VisibleCols=["Expression";"Value";"Location";"Size";"Refresh";"Type";"Scope"], ColWidths=[147;174;84;48;67;195;133]
+TableHeader="Call Stack", SortCol="Function", SortOrder="ASCENDING", VisibleCols=["Function";"Stack Info";"Source"], ColWidths=[125;100;156]

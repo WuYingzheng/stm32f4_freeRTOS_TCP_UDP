@@ -4,30 +4,7 @@
 
     VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
 
-    This file is part of the FreeRTOS distribution.
-
-    FreeRTOS is free software; you can redistribute it and/or modify it under
-    the terms of the GNU General Public License (version 2) as published by the
-    Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
-
-    ***************************************************************************
-    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
-    >>!   distribute a combined work that includes FreeRTOS without being   !<<
-    >>!   obliged to provide the source code for proprietary components     !<<
-    >>!   outside of the FreeRTOS kernel.                                   !<<
-    ***************************************************************************
-
-    FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
-    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  Full license text is available on the following
-    link: http://www.freertos.org/a00114.html
-
-    ***************************************************************************
-     *                                                                       *
-     *    FreeRTOS provides completely free yet professionally developed,    *
-     *    robust, strictly quality controlled, supported, and cross          *
-     *    platform software that is more than just the market leader, it     *
-     *    is the industry's de facto standard.                               *
+    ***************************************************************************                             *
      *                                                                       *
      *    Help yourself get started quickly while simultaneously helping     *
      *    to support the FreeRTOS project by purchasing a FreeRTOS           *
@@ -35,10 +12,6 @@
      *    http://www.FreeRTOS.org/Documentation                              *
      *                                                                       *
     ***************************************************************************
-
-    http://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
-    the FAQ page "My application does not run, what could be wrong?".  Have you
-    defined configASSERT()?
 
     http://www.FreeRTOS.org/support - In return for receiving this top quality
     embedded software for free we request you assist our global community by
@@ -55,16 +28,6 @@
 
     http://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
     Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
-
-    http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
-    Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
-    licenses offer ticketed support, indemnification and commercial middleware.
-
-    http://www.SafeRTOS.com - High Integrity Systems also provide a safety
-    engineered and independently SIL3 certified version for use in safety and
-    mission critical applications that require provable dependability.
-
-    1 tab == 4 spaces!
 */
 
 /*
@@ -324,7 +287,7 @@ int main( void )
 
 
 	/* Start the RTOS scheduler. */
-	FreeRTOS_debug_printf( ("vTaskStartScheduler\n") );
+	FreeRTOS_debug_printf( ("vTaskStartScheduler\n") ); //这边没有定义
 	vTaskStartScheduler();
 
 	/* If all is well, the scheduler will now be running, and the following
@@ -491,7 +454,7 @@ int main( void )
 
 #endif /*( ( mainCREATE_FTP_SERVER == 1 ) || ( mainCREATE_HTTP_SERVER == 1 ) )*/
 /*-----------------------------------------------------------*/
-
+//现在的钩子函数每秒亮一次
 void vApplicationIdleHook( void )
 {
 const TickType_t xToggleRate = pdMS_TO_TICKS( 1000UL );
@@ -499,11 +462,11 @@ static TickType_t xLastToggle = 0, xTimeNow;
 
 	xTimeNow = xTaskGetTickCount();
 
-	/* As there is not Timer task, toggle the LED 'manually'.  Doing this from
+	/* As there is not Timer task, toggle 开关，切换 the LED 'manually'.  Doing this from
 	the Idle task will also provide visual feedback of the processor load. */
 	if( ( xTimeNow - xLastToggle ) >= xToggleRate )
 	{
-		HAL_GPIO_TogglePin( GPIOF, GPIO_PIN_9 );
+		HAL_GPIO_TogglePin( GPIOF, GPIO_PIN_9 );//led灯取反
 		xLastToggle += xToggleRate;
 	}
 }
@@ -575,20 +538,21 @@ RCC_PeriphCLKInitTypeDef PeriphClkInitStruct;
 	RCC_OscInitStruct.PLL.PLLN = 336;
 	RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
 	RCC_OscInitStruct.PLL.PLLQ = 7;
-	HAL_RCC_OscConfig( &RCC_OscInitStruct );
+	HAL_RCC_OscConfig( &RCC_OscInitStruct ); //初始化晶振
 
 	RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_SYSCLK|RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
 	RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
 	RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
 	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
 	RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
-	HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5);
+	HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5);//Initializes the CPU, AHB and APB busses clocks
 
 	PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_RTC;
 	PeriphClkInitStruct.RTCClockSelection = RCC_RTCCLKSOURCE_LSI;
-	HAL_RCCEx_PeriphCLKConfig( &PeriphClkInitStruct );
+	HAL_RCCEx_PeriphCLKConfig( &PeriphClkInitStruct );  //调用stm32库函数
 
-	HAL_RCC_MCOConfig(RCC_MCO1, RCC_MCO1SOURCE_HSE, RCC_MCODIV_1);
+	//Selects the clock source to output on MCO1 pin(PA8) or on MCO2 pin(PC9).
+	HAL_RCC_MCOConfig(RCC_MCO1, RCC_MCO1SOURCE_HSE, RCC_MCODIV_1); //开发板这个引脚应该没有使用
 }
 /*-----------------------------------------------------------*/
 
@@ -603,16 +567,11 @@ GPIO_InitTypeDef GPIO_InitStruct;
 	/* Configure clocks. */
 	prvConfigureClocks();
 
-	/* GPIO Ports Clock Enable */
-	__GPIOA_CLK_ENABLE();
-	__GPIOG_CLK_ENABLE();
+	/* 打开GPIO端口时钟，GPIO Ports Clock Enable */
 	__GPIOD_CLK_ENABLE();
 	__GPIOE_CLK_ENABLE();
 	__GPIOF_CLK_ENABLE();
 	__GPIOH_CLK_ENABLE();
-	__GPIOB_CLK_ENABLE();
-	__GPIOC_CLK_ENABLE();
-
 	/* Configure GPIO pins : PE2 PE5 PE6 和JLink相关*/
 	GPIO_InitStruct.Pin = GPIO_PIN_2|GPIO_PIN_5|GPIO_PIN_6;
 	GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
@@ -628,10 +587,12 @@ GPIO_InitTypeDef GPIO_InitStruct;
 	GPIO_InitStruct.Speed = GPIO_SPEED_LOW;
 	HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
 
-	/*Configure GPIO pin : PH13 (SD card detect) */
+	/*开发板上没有关于SD卡自动检测的引脚，Configure GPIO pin : PH13 (SD card detect) */
 	GPIO_InitStruct.Pin = GPIO_PIN_13;
 	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-	GPIO_InitStruct.Pull = GPIO_PULLUP;
+   //GPIO_InitStruct.Pull = GPIO_PULLUP;
+	//检测引脚下拉，这样就会一直认为有sd卡
+	GPIO_InitStruct.Pull =GPIO_PULLDOWN;
 	HAL_GPIO_Init(GPIOH, &GPIO_InitStruct);
 
 	/* Heap_5 is used so the maximum heap size available can be calculated and
@@ -889,7 +850,10 @@ void vApplicationTickHook( void )
 }
 /*-----------------------------------------------------------*/
 
-/* This is an ST HAL driver callback function. */
+/* 这个函数在 HAL_ETH_Init( &xETH )函数中被调用,初始化以太网收发器;
+ * HAL_ETH_Init( &xETH )在接口层函数 xNetworkInterfaceInitialise()中调用 ，
+ * This is an ST HAL driver callback function.
+ */
 void HAL_ETH_MspInit( ETH_HandleTypeDef* xETHHandle )
 {
 GPIO_InitTypeDef GPIO_InitStruct;
@@ -901,6 +865,11 @@ GPIO_InitTypeDef GPIO_InitStruct;
 		__ETHMACRX_CLK_ENABLE();	/* defined as __HAL_RCC_ETHMACRX_CLK_ENABLE. */
 		__ETHMACTX_CLK_ENABLE();	/* defined as __HAL_RCC_ETHMACTX_CLK_ENABLE. */
 
+		//包括以太网的IO端口；
+		__GPIOA_CLK_ENABLE();
+		__GPIOB_CLK_ENABLE();
+		__GPIOC_CLK_ENABLE();
+		__GPIOG_CLK_ENABLE();
 		/**ETH GPIO Configuration
 		Please check Ethernet GPIO's with the hardware manual
 	**	PA1     ------> ETH_RX_CLK
@@ -981,6 +950,7 @@ GPIO_InitTypeDef GPIO_InitStruct;
 		GPIO_InitStruct.Alternate = GPIO_AF11_ETH;
 		HAL_GPIO_Init( GPIOA, &GPIO_InitStruct );
 
+//下面的代码设置PA8为时钟输出
 //		GPIO_InitStruct.Pin = GPIO_PIN_8;
 //		GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
 //		GPIO_InitStruct.Pull = GPIO_NOPULL;

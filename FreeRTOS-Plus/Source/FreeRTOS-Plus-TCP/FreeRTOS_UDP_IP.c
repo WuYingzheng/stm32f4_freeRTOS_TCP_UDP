@@ -84,7 +84,10 @@
 
 /* Part of the Ethernet and IP headers are always constant when sending an IPv4
 UDP packet.  This array defines the constant parts, allowing this part of the
-packet to be filled in using a simple memcpy() instead of individual writes. */
+packet to be filled in using a simple memcpy() instead of individual writes.
+发送IPv4 UDP数据包时，以太网和IP报头的一部分始终保持不变。 该数组定义了常量部分，
+允许使用简单的memcpy（）来填充这部分数据包，而不是单独写入
+*/
 UDPPacketHeader_t xDefaultPartUDPPacketHeader =
 {
 	/* .ucBytes : */

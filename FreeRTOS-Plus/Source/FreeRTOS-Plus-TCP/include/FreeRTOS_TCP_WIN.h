@@ -74,13 +74,14 @@ typedef struct xTCPTimer
 	uint32_t ulBorn;
 } TCPTimer_t;
 
+//tcp段
 typedef struct xTCP_SEGMENT
 {
 	uint32_t ulSequenceNumber;		/* The sequence number of the first byte in this packet */
 	int32_t lMaxLength;				/* Maximum space, number of bytes which can be stored in this segment */
 	int32_t lDataLength;			/* Actual number of bytes */
 	int32_t lStreamPos;				/* reference to the [t|r]xStream of the socket */
-	TCPTimer_t xTransmitTimer;		/* saves a timestamp at the moment this segment gets transmitted (TX only) */
+	TCPTimer_t xTransmitTimer;		/* 消息开始发送时的时间戳 saves a timestamp at the moment this segment gets transmitted (TX only) */
 	union
 	{
 		struct
