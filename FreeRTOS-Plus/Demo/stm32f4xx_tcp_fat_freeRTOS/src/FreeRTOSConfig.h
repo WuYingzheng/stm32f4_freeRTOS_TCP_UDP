@@ -111,6 +111,9 @@ extern uint32_t SystemCoreClock;
 #define configNUM_THREAD_LOCAL_STORAGE_POINTERS	3 /* FreeRTOS+FAT requires 3 pointers if a CWD is supported. */
 #define configUSE_STATS_FORMATTING_FUNCTIONS	1
 
+//使用易失性列表
+#define configLIST_VOLATILE                     volatile
+
 /* Co-routine definitions. */
 #define configUSE_CO_ROUTINES					0
 #define configMAX_CO_ROUTINE_PRIORITIES			( 2 )

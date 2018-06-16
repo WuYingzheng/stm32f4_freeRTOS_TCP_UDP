@@ -152,8 +152,8 @@ debugger. */
 	#define portTASK_RETURN_ADDRESS	prvTaskExitError
 #endif
 
-/* Each task maintains its own interrupt status in the critical nesting
-variable. */
+/* Each task maintains its own interrupt status in the critical nesting variable. */
+//该变量在 xPortStartScheduler() 被初始化为0
 static UBaseType_t uxCriticalNesting = 0xaaaaaaaa;
 
 /*
@@ -300,11 +300,17 @@ void vPortSVCHandler( void )
 					"	bx r14							\n" //跳转到 r14
 					"									\n"
 					"	.align 4						\n"
-					"pxCurrentTCBConst2: .word pxCurrentTCB				\n" //label: .word value: places the 4-byte value at the address assigned (by the linker) to label.
+			//label: .word value: places the 4-byte value at the address assigned (by the linker) to label.
+					"pxCurrentTCBConst2: .word pxCurrentTCB				\n"
 				);
 }
 /*-----------------------------------------------------------*/
-
+/*
+ * 这个过程
+ *   重新设置了栈指针;
+ *   将控制寄存器清零；
+ *   触发svc异常，启动第一个任务
+ */
 static void prvPortStartFirstTask( void )
 {
 	/* Start the first task.  This also clears the bit that indicates the FPU is
@@ -312,17 +318,17 @@ static void prvPortStartFirstTask( void )
 	would otherwise result in the unnecessary leaving of space in the SVC stack
 	for lazy saving of FPU registers. */
 	__asm volatile(
-					" ldr r0, =0xE000ED08 	\n" /* Use the NVIC offset register to locate the stack. */
-					" ldr r0, [r0] 			\n"
-					" ldr r0, [r0] 			\n"
+					" ldr r0, =0xE000ED08 	\n" /* Use the NVIC offset register to locate the stack.向量表偏移寄存器地址 */
+					" ldr r0, [r0] 			\n" /*取向量表地址*/
+					" ldr r0, [r0] 			\n" /*取 MSP 初始值*/
 					" msr msp, r0			\n" /* Set the msp back to the start of the stack. */
 					" mov r0, #0			\n" /* Clear the bit that indicates the FPU is in use, see comment above. */
-					" msr control, r0		\n"
+					" msr control, r0		\n" //控制寄存器清零
 					" cpsie i				\n" /* Globally enable interrupts. */
-					" cpsie f				\n"
-					" dsb					\n"
-					" isb					\n"
-					" svc 0					\n" /* System call to start first task. */
+					" cpsie f				\n" //打开异常
+					" dsb					\n"	//数据同步
+					" isb					\n" //指令同步隔离
+					" svc 0					\n" /* System call to start first task. 触发异常，启用第一个任务*/
 					" nop					\n"
 				);
 }
@@ -357,18 +363,20 @@ BaseType_t xPortStartScheduler( void )
 		Save the interrupt priority value that is about to be clobbered. */
 		ulOriginalPriority = *pucFirstUserPriorityRegister;
 
-		/* Determine the number of priority bits available.  First write to all
-		possible bits. */
+		/* Determine the number of priority bits available.  First write to all possible bits. */
+		//判断处理器支持的优先级位数，先全部写入11,
 		*pucFirstUserPriorityRegister = portMAX_8_BIT_VALUE;
 
 		/* Read the value back to see how many bits stuck. */
+		//重新读回，不能设置的位依然为0
 		ucMaxPriorityValue = *pucFirstUserPriorityRegister;
 
 		/* Use the same mask on the maximum system call priority. */
+		//确保用户设置的优先级不会超出范围
 		ucMaxSysCallPriority = configMAX_SYSCALL_INTERRUPT_PRIORITY & ucMaxPriorityValue;
 
-		/* Calculate the maximum acceptable priority group value for the number
-		of bits read back. */
+		/* Calculate the maximum acceptable priority group value for the number of bits read back. */
+		//计算最大的组优先级，将 ucMaxPriorityValue 向左进行移位计算
 		ulMaxPRIGROUPValue = portMAX_PRIGROUP_BITS;
 		while( ( ucMaxPriorityValue & portTOP_BIT_OF_BYTE ) == portTOP_BIT_OF_BYTE )
 		{
@@ -394,18 +402,18 @@ BaseType_t xPortStartScheduler( void )
 		}
 		#endif
 
-		/* Shift the priority group value back to its position within the AIRCR
-		register. */
+		/* Shift the priority group value back to its position within the AIRCR register. */
 		ulMaxPRIGROUPValue <<= portPRIGROUP_SHIFT;
 		ulMaxPRIGROUPValue &= portPRIORITY_GROUP_MASK;
 
-		/* Restore the clobbered interrupt priority register to its original
-		value. */
+		// Restore the clobbered interrupt priority register to its original value.
+		// 恢复优先级配置寄存器
 		*pucFirstUserPriorityRegister = ulOriginalPriority;
 	}
 	#endif /* conifgASSERT_DEFINED */
 
-	/* Make PendSV and SysTick the lowest priority interrupts. */
+	// Make PendSV and SysTick the lowest priority interrupts.
+	// 保证系统会话切换不会阻塞系统其他中断的响应
 	portNVIC_SYSPRI2_REG |= portNVIC_PENDSV_PRI;
 	portNVIC_SYSPRI2_REG |= portNVIC_SYSTICK_PRI;
 
@@ -471,47 +479,53 @@ void vPortExitCritical( void )
 	}
 }
 /*-----------------------------------------------------------*/
-
+/*用于切换上下文，通过悬起PendSV异常，系统会直到其它所有ISR都处理完成，才执行该异常服务程序
+ * ：保存当前任务现场，选择切换的任务，进行任务切换，退出异常会线程任务运行新任务。
+ *  系统进入异常处理程序的时候，使用的是主堆栈指针 MSP， 而一般情况下运行任务使用的线程模式使用的是进程堆栈指针 PSP
+ *  对应这两个指针，系统有两种堆栈，系统内核和异常程序处理使用的是主堆栈，MSP 指向其栈顶。而对应而不同任务，我们在创
+ *  建时为其分配了空间，作为该任务的堆栈，在该任务运行时，由系统设置进程堆栈 PSP 指向该栈顶。
+ *  进入中断服务例程时，硬件会自动将R3——R0,R12.LR，PC，XPSR入栈。
+*/
 void xPortPendSVHandler( void )
 {
 	/* This is a naked function. */
 
 	__asm volatile
 	(
-	"	mrs r0, psp							\n"
-	"	isb									\n"
+	"	mrs r0, psp							\n" // 取出当前任务的栈顶指针 也就是 psp -> R0
+	"	isb									\n" // 指令同步隔离
 	"										\n"
 	"	ldr	r3, pxCurrentTCBConst			\n" /* Get the location of the current TCB. */
-	"	ldr	r2, [r3]						\n"
+	"	ldr	r2, [r3]						\n" // TCB的第一个字段是栈顶指针
 	"										\n"
 	"	tst r14, #0x10						\n" /* Is the task using the FPU context?  If so, push high vfp registers. */
 	"	it eq								\n"
 	"	vstmdbeq r0!, {s16-s31}				\n"
 	"										\n"
-	"	stmdb r0!, {r4-r11, r14}			\n" /* Save the core registers. */
-	"	str r0, [r2]						\n" /* Save the new top of stack into the first member of the TCB. */
+	"	stmdb r0!, {r4-r11, r14}			\n" /* r0先-4,再压栈，先压r14，循环，退出中断前，硬件自动将xPSR、PC、LR、R12、R0-R3压入栈，Save the core registers. */
+	"	str r0, [r2]						\n" /* 把栈顶写入 pxCurrentTCB ，Save the new top of stack into the first member of the TCB. */
 	"										\n"
-	"	stmdb sp!, {r3}						\n"
-	"	mov r0, %0 							\n"
-	"	msr basepri, r0						\n"
-	"	dsb									\n"
-	"	isb									\n"
-	"	bl vTaskSwitchContext				\n"
-	"	mov r0, #0							\n"
-	"	msr basepri, r0						\n"
-	"	ldmia sp!, {r3}						\n"
+	"	stmdb sp!, {r3}						\n" //将R3压入主栈中
+	"	mov r0, %0 							\n" //进入临界区域
+	"	msr basepri, r0						\n" //...
+	"	dsb									\n" //数据同步隔离
+	"	isb									\n" //指令同步隔离
+	"	bl vTaskSwitchContext				\n" //调用函数切换上下文，通过使变量pxCurrentTCB指向新的任务来实现任务切换
+	"	mov r0, #0							\n" //退出临界区
+	"	msr basepri, r0						\n" //...
+	"	ldmia sp!, {r3}						\n" //恢复R3寄存器的值
 	"										\n"
 	"	ldr r1, [r3]						\n" /* The first item in pxCurrentTCB is the task top of stack. */
-	"	ldr r0, [r1]						\n"
+	"	ldr r0, [r1]						\n" //载入新任务的栈地址
 	"										\n"
-	"	ldmia r0!, {r4-r11, r14}			\n" /* Pop the core registers. */
+	"	ldmia r0!, {r4-r11, r14}			\n" /* 这些寄存器不会主动出栈，需要手动出栈，Pop the core registers. */
 	"										\n"
 	"	tst r14, #0x10						\n" /* Is the task using the FPU context?  If so, pop the high vfp registers too. */
 	"	it eq								\n"
 	"	vldmiaeq r0!, {s16-s31}				\n"
 	"										\n"
 	"	msr psp, r0							\n"
-	"	isb									\n"
+	"	isb									\n" //指令隔离
 	"										\n"
 	#ifdef WORKAROUND_PMU_CM001 /* XMC4000 specific errata workaround. */
 		#if WORKAROUND_PMU_CM001 == 1
@@ -520,7 +534,11 @@ void xPortPendSVHandler( void )
 		#endif
 	#endif
 	"										\n"
-	"	bx r14								\n"
+	/* 异常发生时,R14中保存异常返回标志,包括返回后进入线程模式还是处理器模式、使用PSP堆栈指针还是MSP堆栈指针，
+	 * 当调用 bx r14指令后，硬件会知道要从异常返回，然后出栈，这个时候堆栈指针PSP已经指向了新任务堆栈的正确位置，
+	 * 当新任务的运行地址被出栈到PC寄存器后，新的任务也会被执行。
+	 */
+	"	bx r14								\n" //通知硬件从异常返回，硬件会自动将R3——R0,R12.LR，PC，XPSR出栈
 	"										\n"
 	"	.align 4							\n"
 	"pxCurrentTCBConst: .word pxCurrentTCB	\n"
@@ -528,7 +546,7 @@ void xPortPendSVHandler( void )
 	);
 }
 /*-----------------------------------------------------------*/
-
+//挂起一个pendsv 异常，请求上下文切换
 void xPortSysTickHandler( void )
 {
 	/* The SysTick runs at the lowest interrupt priority, so when this interrupt

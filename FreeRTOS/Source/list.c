@@ -83,16 +83,14 @@ void vListInitialise( List_t * const pxList )
 	as the only list entry. */
 	pxList->pxIndex = ( ListItem_t * ) &( pxList->xListEnd );			/*lint !e826 !e740 The mini list structure is used as the list end to save RAM.  This is checked and valid. */
 
-	/* The list end value is the highest possible value in the list to
-	ensure it remains at the end of the list. */
-	pxList->xListEnd.xItemValue = portMAX_DELAY;
+	/* The list end value is the highest possible value in the list to ensure it remains at the end of the list. */
+	pxList->xListEnd.xItemValue = portMAX_DELAY; //设置成可能的最大值，以确保 xListEnd 在队列的最后
 
-	/* The list end next and previous pointers point to itself so we know
-	when the list is empty. */
+	/* The list end next and previous pointers point to itself so we know when the list is empty. */
 	pxList->xListEnd.pxNext = ( ListItem_t * ) &( pxList->xListEnd );	/*lint !e826 !e740 The mini list structure is used as the list end to save RAM.  This is checked and valid. */
 	pxList->xListEnd.pxPrevious = ( ListItem_t * ) &( pxList->xListEnd );/*lint !e826 !e740 The mini list structure is used as the list end to save RAM.  This is checked and valid. */
 
-	pxList->uxNumberOfItems = ( UBaseType_t ) 0U;
+	pxList->uxNumberOfItems = ( UBaseType_t ) 0U; //队列实体数量为0
 
 	/* Write known values into the list if
 	configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
@@ -104,15 +102,15 @@ void vListInitialise( List_t * const pxList )
 void vListInitialiseItem( ListItem_t * const pxItem )
 {
 	/* Make sure the list item is not recorded as being on a list. */
-	pxItem->pvContainer = NULL;
+	pxItem->pvContainer = NULL; //确保队列对象没有被任何队列包含
 
-	/* Write known values into the list item if
-	configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
+	/* Write known values into the list item if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
+	//写入一个已知值，确保数据的完整性
 	listSET_FIRST_LIST_ITEM_INTEGRITY_CHECK_VALUE( pxItem );
 	listSET_SECOND_LIST_ITEM_INTEGRITY_CHECK_VALUE( pxItem );
 }
 /*-----------------------------------------------------------*/
-
+//将队列对象插入到一个队列的最后
 void vListInsertEnd( List_t * const pxList, ListItem_t * const pxNewListItem )
 {
 ListItem_t * const pxIndex = pxList->pxIndex;
@@ -141,10 +139,16 @@ ListItem_t * const pxIndex = pxList->pxIndex;
 	( pxList->uxNumberOfItems )++;
 }
 /*-----------------------------------------------------------*/
-
+/*
+ * 每个列表项对象都有一个列表项值（xItemValue），通常是一个被跟踪的任务优先级或是一个调度事件的计数器值。
+ * 如果xItemValue的值與列表中對象中的某個值相等，新的列表對象將會插入到这些对象的最后
+ * 调用API函数vListInsert( List_t * const pxList, ListItem_t * const pxNewListItem)可以将
+ * pxNewListItem指向的列表项插入到pxList指向的列表中，列表项在列表的位置由pxNewListItem->xItemValue
+ * 决定，按照降序排列。
+ */
 void vListInsert( List_t * const pxList, ListItem_t * const pxNewListItem )
 {
-ListItem_t *pxIterator;
+ListItem_t *pxIterator; //迭代标志
 const TickType_t xValueOfInsertion = pxNewListItem->xItemValue;
 
 	/* Only effective when configASSERT() is also defined, these tests may catch
@@ -159,8 +163,9 @@ const TickType_t xValueOfInsertion = pxNewListItem->xItemValue;
 	new list item should be placed after it.  This ensures that TCB's which are
 	stored in ready lists (all of which have the same xItemValue value) get a
 	share of the CPU.  However, if the xItemValue is the same as the back marker
-	the iteration loop below will not end.  Therefore the value is checked
+	the iteration loop 迭代循环 below will not end.  Therefore the value is checked
 	first, and the algorithm slightly modified if necessary. */
+	//首先检查 xValueOfInsertion 的值，确保下面的循环可以结束
 	if( xValueOfInsertion == portMAX_DELAY )
 	{
 		pxIterator = pxList->xListEnd.pxPrevious;
