@@ -109,7 +109,7 @@ extern uint32_t SystemCoreClock;
 #define configUSE_TASK_NOTIFICATIONS			1
 #define configUSE_TICKLESS_IDLE					0
 #define configNUM_THREAD_LOCAL_STORAGE_POINTERS	3 /* FreeRTOS+FAT requires 3 pointers if a CWD is supported. */
-#define configUSE_STATS_FORMATTING_FUNCTIONS	1
+#define configUSE_STATS_FORMATTING_FUNCTIONS	1     //格式化任务状态输出
 
 //使用易失性列表
 #define configLIST_VOLATILE                     volatile
@@ -131,7 +131,7 @@ confused when trying to unwind a stack frame.  */
 
 /* Set the following definitions to 1 to include the API function, or zero
 to exclude the API function. */
-#define INCLUDE_vTaskPrioritySet				1
+#define INCLUDE_vTaskPrioritySet				1         //设置任务优先级
 #define INCLUDE_uxTaskPriorityGet				1
 #define INCLUDE_vTaskDelete						1
 #define INCLUDE_vTaskCleanUpResources			0

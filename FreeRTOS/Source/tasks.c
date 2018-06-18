@@ -2,68 +2,6 @@
     FreeRTOS V9.0.0 - Copyright (C) 2016 Real Time Engineers Ltd.
     All rights reserved
 
-    VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
-
-    This file is part of the FreeRTOS distribution.
-
-    FreeRTOS is free software; you can redistribute it and/or modify it under
-    the terms of the GNU General Public License (version 2) as published by the
-    Free Software Foundation >>>> AND MODIFIED BY <<<< the FreeRTOS exception.
-
-    ***************************************************************************
-    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
-    >>!   distribute a combined work that includes FreeRTOS without being   !<<
-    >>!   obliged to provide the source code for proprietary components     !<<
-    >>!   outside of the FreeRTOS kernel.                                   !<<
-    ***************************************************************************
-
-    FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
-    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  Full license text is available on the following
-    link: http://www.freertos.org/a00114.html
-
-    ***************************************************************************
-     *                                                                       *
-     *    FreeRTOS provides completely free yet professionally developed,    *
-     *    robust, strictly quality controlled, supported, and cross          *
-     *    platform software that is more than just the market leader, it     *
-     *    is the industry's de facto standard.                               *
-     *                                                                       *
-     *    Help yourself get started quickly while simultaneously helping     *
-     *    to support the FreeRTOS project by purchasing a FreeRTOS           *
-     *    tutorial book, reference manual, or both:                          *
-     *    http://www.FreeRTOS.org/Documentation                              *
-     *                                                                       *
-    ***************************************************************************
-
-    http://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
-    the FAQ page "My application does not run, what could be wrong?".  Have you
-    defined configASSERT()?
-
-    http://www.FreeRTOS.org/support - In return for receiving this top quality
-    embedded software for free we request you assist our global community by
-    participating in the support forum.
-
-    http://www.FreeRTOS.org/training - Investing in training allows your team to
-    be as productive as possible as early as possible.  Now you can receive
-    FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
-    Ltd, and the world's leading authority on the world's leading RTOS.
-
-    http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
-    including FreeRTOS+Trace - an indispensable productivity tool, a DOS
-    compatible FAT file system, and our tiny thread aware UDP/IP stack.
-
-    http://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
-    Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
-
-    http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
-    Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
-    licenses offer ticketed support, indemnification and commercial middleware.
-
-    http://www.SafeRTOS.com - High Integrity Systems also provide a safety
-    engineered and independently SIL3 certified version for use in safety and
-    mission critical applications that require provable dependability.
-
     1 tab == 4 spaces!
 */
 
@@ -139,6 +77,7 @@ a statically allocated stack and a dynamically allocated TCB. */
 
 /*
  * Macros used by vListTask to indicate which state a task is in.
+ * 用来指示任务状态的宏
  */
 #define tskBLOCKED_CHAR		( 'B' )
 #define tskREADY_CHAR		( 'R' )
@@ -154,7 +93,7 @@ a statically allocated stack and a dynamically allocated TCB. */
 #endif
 
 #if ( configUSE_PORT_OPTIMISED_TASK_SELECTION == 0 )
-
+    //根据特定的控制器优化任务选择的方法
 	/* If configUSE_PORT_OPTIMISED_TASK_SELECTION is 0 then task selection is
 	performed in a generic way that is not optimised to any particular
 	microcontroller architecture. */
@@ -293,15 +232,15 @@ to its original value when it is released. */
 typedef struct tskTaskControlBlock
 {
 	volatile StackType_t	*pxTopOfStack;	/*< Points to the location of the last item placed on the tasks stack.  THIS MUST BE THE FIRST MEMBER OF THE TCB STRUCT. */
-
-	#if ( portUSING_MPU_WRAPPERS == 1 )
+                                            //当前堆栈的栈顶，必须位于任务结构体的第一项，在移植层任务切换的时候会用到
+	#if ( portUSING_MPU_WRAPPERS == 1 )     //设置MPU，这个条目必须在结构体的第二项
 		xMPU_SETTINGS	xMPUSettings;		/*< The MPU settings are defined as part of the port layer.  THIS MUST BE THE SECOND MEMBER OF THE TCB STRUCT. */
 	#endif
 
-	ListItem_t			xStateListItem;	/*< The list that the state list item of a task is reference from denotes the state of that task (Ready, Blocked, Suspended ). */
-	ListItem_t			xEventListItem;		/*< Used to reference a task from an event list. */
-	UBaseType_t			uxPriority;			/*< The priority of the task.  0 is the lowest priority. */
-	StackType_t			*pxStack;			/*< Points to the start of the stack. */
+	ListItem_t			xStateListItem;	/*< 状态链表 The list that the state list item of a task is reference from denotes the state of that task (Ready, Blocked, Suspended ). */
+	ListItem_t			xEventListItem;		/*< 事件链表 Used to reference a task from an event list. */
+	UBaseType_t			uxPriority;			/*< 任务的优先级 The priority of the task.  0 is the lowest priority. */
+	StackType_t			*pxStack;			/*< 堆栈的起始地址 Points to the start of the stack. */
 	char				pcTaskName[ configMAX_TASK_NAME_LEN ];/*< Descriptive name given to the task when created.  Facilitates debugging only. */ /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
 
 	#if ( portSTACK_GROWTH > 0 )
@@ -309,7 +248,7 @@ typedef struct tskTaskControlBlock
 	#endif
 
 	#if ( portCRITICAL_NESTING_IN_TCB == 1 )
-		UBaseType_t		uxCriticalNesting;	/*< Holds the critical section nesting depth for ports that do not maintain their own count in the port layer. */
+		UBaseType_t		uxCriticalNesting;	/*< 临界区嵌套深度 Holds the critical section nesting depth for ports that do not maintain their own count in the port layer. */
 	#endif
 
 	#if ( configUSE_TRACE_FACILITY == 1 )
@@ -318,7 +257,7 @@ typedef struct tskTaskControlBlock
 	#endif
 
 	#if ( configUSE_MUTEXES == 1 )
-		UBaseType_t		uxBasePriority;		/*< The priority last assigned to the task - used by the priority inheritance mechanism. */
+		UBaseType_t		uxBasePriority;		/*< 任务的基础优先级，为了防止优先级反转 The priority last assigned to the task - used by the priority inheritance mechanism. */
 		UBaseType_t		uxMutexesHeld;
 	#endif
 
@@ -326,12 +265,12 @@ typedef struct tskTaskControlBlock
 		TaskHookFunction_t pxTaskTag;
 	#endif
 
-	#if( configNUM_THREAD_LOCAL_STORAGE_POINTERS > 0 )
+	#if( configNUM_THREAD_LOCAL_STORAGE_POINTERS > 0 )  //线程本地存储指针
 		void *pvThreadLocalStoragePointers[ configNUM_THREAD_LOCAL_STORAGE_POINTERS ];
 	#endif
 
 	#if( configGENERATE_RUN_TIME_STATS == 1 )
-		uint32_t		ulRunTimeCounter;	/*< Stores the amount of time the task has spent in the Running state. */
+		uint32_t		ulRunTimeCounter;	/*< 记录任务在运行状态下执行的总时间 Stores the amount of time the task has spent in the Running state. */
 	#endif
 
 	#if ( configUSE_NEWLIB_REENTRANT == 1 )
@@ -346,14 +285,14 @@ typedef struct tskTaskControlBlock
 	#endif
 
 	#if( configUSE_TASK_NOTIFICATIONS == 1 )
-		volatile uint32_t ulNotifiedValue;
+		volatile uint32_t ulNotifiedValue;   //与任务通知相关
 		volatile uint8_t ucNotifyState;
 	#endif
 
 	/* See the comments above the definition of
 	tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE. */
 	#if( tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE != 0 ) /*lint !e731 Macro has been consolidated for readability reasons. */
-		uint8_t	ucStaticallyAllocated; 		/*< Set to pdTRUE if the task is a statically allocated to ensure no attempt is made to free the memory. */
+		uint8_t	ucStaticallyAllocated; 		/*< 用来标记这个TCB被成功分配，防止被误擦除，Set to pdTRUE if the task is a statically allocated to ensure no attempt is made to free the memory. */
 	#endif
 
 	#if( INCLUDE_xTaskAbortDelay == 1 )
@@ -372,7 +311,9 @@ static variables must be declared volatile. */
 PRIVILEGED_DATA TCB_t * volatile pxCurrentTCB = NULL;
 
 /* Lists for ready and blocked tasks. --------------------*/
+//就绪任务链表，为每个优先级分配一个链表
 PRIVILEGED_DATA static List_t pxReadyTasksLists[ configMAX_PRIORITIES ];/*< Prioritised ready tasks. */
+//有两个延迟链表，一个用来记录滴答计时器溢出的延迟链表
 PRIVILEGED_DATA static List_t xDelayedTaskList1;						/*< Delayed tasks. */
 PRIVILEGED_DATA static List_t xDelayedTaskList2;						/*< Delayed tasks (two lists are used - one for delays that have overflowed the current tick count. */
 PRIVILEGED_DATA static List_t * volatile pxDelayedTaskList;				/*< Points to the delayed task list currently being used. */
@@ -380,14 +321,14 @@ PRIVILEGED_DATA static List_t * volatile pxOverflowDelayedTaskList;		/*< Points 
 PRIVILEGED_DATA static List_t xPendingReadyList;						/*< Tasks that have been readied while the scheduler was suspended.  They will be moved to the ready list when the scheduler is resumed. */
 
 #if( INCLUDE_vTaskDelete == 1 )
-
+// 任务删除后，等待空闲任务释放内存
 	PRIVILEGED_DATA static List_t xTasksWaitingTermination;				/*< Tasks that have been deleted - but their memory not yet freed. */
 	PRIVILEGED_DATA static volatile UBaseType_t uxDeletedTasksWaitingCleanUp = ( UBaseType_t ) 0U;
 
 #endif
 
 #if ( INCLUDE_vTaskSuspend == 1 )
-
+//被挂起的任务列表
 	PRIVILEGED_DATA static List_t xSuspendedTaskList;					/*< Tasks that are currently suspended. */
 
 #endif
@@ -601,18 +542,22 @@ static void prvAddNewTaskToReadyList( TCB_t *pxNewTCB ) PRIVILEGED_FUNCTION;
 		{
 			/* The memory used for the task's TCB and stack are passed into this
 			function - use them. */
+			//设置用户传递进来的任务控制块
 			pxNewTCB = ( TCB_t * ) pxTaskBuffer; /*lint !e740 Unusual cast is ok as the structures are designed to have the same alignment, and the size is checked by an assert. */
+			//设置用户传递进来的栈空间
 			pxNewTCB->pxStack = ( StackType_t * ) puxStackBuffer;
 
 			#if( tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE != 0 ) /*lint !e731 Macro has been consolidated for readability reasons. */
 			{
 				/* Tasks can be created statically or dynamically, so note this
 				task was created statically in case the task is later deleted. */
+				// 标识这个任务控制块和栈内存时静态的， 这样删除任务的时候， 系统不会做内存回收处理
 				pxNewTCB->ucStaticallyAllocated = tskSTATICALLY_ALLOCATED_STACK_AND_TCB;
 			}
 			#endif /* configSUPPORT_DYNAMIC_ALLOCATION */
-
+			//初始化任务控制块
 			prvInitialiseNewTask( pxTaskCode, pcName, ulStackDepth, pvParameters, uxPriority, &xReturn, pxNewTCB, NULL );
+			//将新任务插入就绪列表
 			prvAddNewTaskToReadyList( pxNewTCB );
 		}
 		else
@@ -722,7 +667,7 @@ static void prvAddNewTaskToReadyList( TCB_t *pxNewTCB ) PRIVILEGED_FUNCTION;
 
 				if( pxNewTCB != NULL )
 				{
-					/* Store the stack location in the TCB. */
+					/* 注意：调用 Malloc 返回的是内存的低端地址。如果栈是向下生长，等会需要做相应的变换 Store the stack location in the TCB. */
 					pxNewTCB->pxStack = pxStack;
 				}
 				else
@@ -763,7 +708,7 @@ static void prvAddNewTaskToReadyList( TCB_t *pxNewTCB ) PRIVILEGED_FUNCTION;
 
 #endif /* configSUPPORT_DYNAMIC_ALLOCATION */
 /*-----------------------------------------------------------*/
-
+//如果成功为任务分配了堆栈，那么就会执行借来的任务块初始化
 static void prvInitialiseNewTask( 	TaskFunction_t pxTaskCode,
 									const char * const pcName,		/*lint !e971 Unqualified char types are allowed for strings and single characters only. */
 									const uint32_t ulStackDepth,
@@ -776,7 +721,7 @@ static void prvInitialiseNewTask( 	TaskFunction_t pxTaskCode,
 StackType_t *pxTopOfStack;
 UBaseType_t x;
 
-	#if( portUSING_MPU_WRAPPERS == 1 )
+	#if( portUSING_MPU_WRAPPERS == 1 )  //如果开启了MPU，判断任务是否运行在特权模式
 		/* Should the task be created in privileged mode? */
 		BaseType_t xRunPrivileged;
 		if( ( uxPriority & portPRIVILEGE_BIT ) != 0U )
@@ -793,7 +738,7 @@ UBaseType_t x;
 	/* Avoid dependency on memset() if it is not required. */
 	#if( ( configCHECK_FOR_STACK_OVERFLOW > 1 ) || ( configUSE_TRACE_FACILITY == 1 ) || ( INCLUDE_uxTaskGetStackHighWaterMark == 1 ) )
 	{
-		/* Fill the stack with a known value to assist debugging. */
+		/* 栈初始化时候填充的数据 Fill the stack with a known value to assist debugging. */
 		( void ) memset( pxNewTCB->pxStack, ( int ) tskSTACK_FILL_BYTE, ( size_t ) ulStackDepth * sizeof( StackType_t ) );
 	}
 	#endif /* ( ( configCHECK_FOR_STACK_OVERFLOW > 1 ) || ( ( configUSE_TRACE_FACILITY == 1 ) || ( INCLUDE_uxTaskGetStackHighWaterMark == 1 ) ) ) */
@@ -804,11 +749,11 @@ UBaseType_t x;
 	by the port. */
 	#if( portSTACK_GROWTH < 0 )
 	{
-		pxTopOfStack = pxNewTCB->pxStack + ( ulStackDepth - ( uint32_t ) 1 ); //pxNewTCB->pxStack表示任务的栈空间，栈向下增长，初始化时加上栈的深度回到栈顶
-		pxTopOfStack = ( StackType_t * ) ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack ) & ( ~( ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) ) );
+		pxTopOfStack = pxNewTCB->pxStack + ( ulStackDepth - ( uint32_t ) 1 ); //将栈初始化为内存的最高端地址，并且这里的加法是指针之间的加法
+		pxTopOfStack = ( StackType_t * ) ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack ) & ( ~( ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) ) ); //做一些对齐处理
 		/*lint !e923 MISRA exception.  Avoiding casts between pointers and integers is not practical.  Size differences accounted for using portPOINTER_SIZE_TYPE type. */
 
-		/* Check the alignment of the calculated top of stack is correct. */
+		/* 检查是否对齐 Check the alignment of the calculated top of stack is correct. */
 		configASSERT( ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack & ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) == 0UL ) );
 	}
 	#else /* portSTACK_GROWTH */
@@ -832,7 +777,7 @@ UBaseType_t x;
 		/* Don't copy all configMAX_TASK_NAME_LEN if the string is shorter than
 		configMAX_TASK_NAME_LEN characters just in case the memory after the
 		string is not accessible (extremely unlikely). */
-		if( pcName[ x ] == 0x00 )
+		if( pcName[ x ] == 0x00 ) //表示"\0"，空字符，其值为0；
 		{
 			break;
 		}
@@ -844,10 +789,12 @@ UBaseType_t x;
 
 	/* Ensure the name string is terminated in the case that the string length
 	was greater or equal to configMAX_TASK_NAME_LEN. */
+	//如果任务名字过长，强制性在字符数组的最后加上一个结束符
 	pxNewTCB->pcTaskName[ configMAX_TASK_NAME_LEN - 1 ] = '\0';
 
 	/* This is used as an array index so must ensure it's not too large.  First
 	remove the privilege bit if one is present. */
+	//确保任务优先级没有超过范围
 	if( uxPriority >= ( UBaseType_t ) configMAX_PRIORITIES )
 	{
 		uxPriority = ( UBaseType_t ) configMAX_PRIORITIES - ( UBaseType_t ) 1U;
@@ -858,7 +805,7 @@ UBaseType_t x;
 	}
 
 	pxNewTCB->uxPriority = uxPriority;
-	#if ( configUSE_MUTEXES == 1 )
+	#if ( configUSE_MUTEXES == 1 )  //使用互斥量
 	{
 		pxNewTCB->uxBasePriority = uxPriority;
 		pxNewTCB->uxMutexesHeld = 0;
@@ -873,6 +820,7 @@ UBaseType_t x;
 	listSET_LIST_ITEM_OWNER( &( pxNewTCB->xStateListItem ), pxNewTCB );
 
 	/* Event lists are always in priority order. */
+	//设置事件链表的对象值，用于插入链表时排序， uxPriority越小，排序越靠后
 	listSET_LIST_ITEM_VALUE( &( pxNewTCB->xEventListItem ), ( TickType_t ) configMAX_PRIORITIES - ( TickType_t ) uxPriority ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
 	listSET_LIST_ITEM_OWNER( &( pxNewTCB->xEventListItem ), pxNewTCB );
 
@@ -914,7 +862,7 @@ UBaseType_t x;
 	}
 	#endif
 
-	#if ( configUSE_TASK_NOTIFICATIONS == 1 )
+	#if ( configUSE_TASK_NOTIFICATIONS == 1 ) //任务消息通知
 	{
 		pxNewTCB->ulNotifiedValue = 0;
 		pxNewTCB->ucNotifyState = taskNOT_WAITING_NOTIFICATION;
@@ -938,6 +886,10 @@ UBaseType_t x;
 	but had been interrupted by the scheduler.  The return address is set
 	to the start of the task function. Once the stack has been initialised
 	the	top of stack variable is updated. */
+	// 初始化栈 使其像任务已经运行了，但是被调度器中断切换，入栈做了现场保护
+	// 当任务被调度器取出后， 可以直接执行出栈恢复现场，运行任务
+	// 而不需要调度器额外特殊处理第一次运行的任务
+	// 栈初始化涉及系统底层， 由对应平台移植层提供
 	#if( portUSING_MPU_WRAPPERS == 1 )
 	{
 		pxNewTCB->pxTopOfStack = pxPortInitialiseStack( pxTopOfStack, pxTaskCode, pvParameters, xRunPrivileged );

@@ -4580,7 +4580,7 @@ OUTPUT(RTOSDemo.elf elf32-littlearm)
  .debug_line    0x00000000000116c4      0x481 src/hr_gettime.o
  .debug_line    0x0000000000011b45      0x8e3 src/main.o
 
-.debug_info     0x0000000000000000    0x40a6a
+.debug_info     0x0000000000000000    0x40a62
  .debug_info    0x0000000000000000       0xd0 src/Drivers/CMSIS/Device/ST/STM32F4xx/Source/Templates/gcc/startup_stm32f407xx.o
  .debug_info    0x00000000000000d0      0x4d4 src/Drivers/CMSIS/Device/ST/STM32F4xx/Source/Templates/system_stm32f4xx.o
  .debug_info    0x00000000000005a4      0x981 src/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.o
@@ -4612,18 +4612,18 @@ OUTPUT(RTOSDemo.elf elf32-littlearm)
  .debug_info    0x000000000002eb15      0x530 src/FreeRTOS_Source/portable/GCC/ARM_CM4F/port.o
  .debug_info    0x000000000002f045      0xd69 src/FreeRTOS_Source/portable/MemMang/heap_5.o
  .debug_info    0x000000000002fdae     0x21ab src/FreeRTOS_Source/queue.o
- .debug_info    0x0000000000031f59     0x31fc src/FreeRTOS_Source/tasks.o
- .debug_info    0x0000000000035155      0xf6c src/Standard_Demos_and_Utils/FreeRTOS_Plus_CLI_Demos/Sample-CLI-commands.o
- .debug_info    0x00000000000360c1      0xfd8 src/Standard_Demos_and_Utils/FreeRTOS_Plus_CLI_Demos/TCP-related-CLI-commands.o
- .debug_info    0x0000000000037099      0xde1 src/Standard_Demos_and_Utils/FreeRTOS_Plus_CLI_Demos/UDPCommandConsole.o
- .debug_info    0x0000000000037e7a      0xecc src/Standard_Demos_and_Utils/FreeRTOS_Plus_TCP_Demos/SimpleTCPEchoServer.o
- .debug_info    0x0000000000038d46      0xfc5 src/Standard_Demos_and_Utils/FreeRTOS_Plus_TCP_Demos/TCPEchoClient_SingleTasks.o
- .debug_info    0x0000000000039d0b      0x280 src/Standard_Demos_and_Utils/FreeRTOS_Plus_TCP_Demos/TraceMacros/Example1/DemoIPTrace.o
- .debug_info    0x0000000000039f8b     0x147e src/Standard_Demos_and_Utils/Utilities/UDPLoggingPrintf.o
- .debug_info    0x000000000003b409      0x9f4 src/Standard_Demos_and_Utils/Utilities/date_and_time.o
- .debug_info    0x000000000003bdfd     0x12d5 src/Standard_Demos_and_Utils/Utilities/printf-stdarg.o
- .debug_info    0x000000000003d0d2     0x12e7 src/hr_gettime.o
- .debug_info    0x000000000003e3b9     0x26b1 src/main.o
+ .debug_info    0x0000000000031f59     0x31f4 src/FreeRTOS_Source/tasks.o
+ .debug_info    0x000000000003514d      0xf6c src/Standard_Demos_and_Utils/FreeRTOS_Plus_CLI_Demos/Sample-CLI-commands.o
+ .debug_info    0x00000000000360b9      0xfd8 src/Standard_Demos_and_Utils/FreeRTOS_Plus_CLI_Demos/TCP-related-CLI-commands.o
+ .debug_info    0x0000000000037091      0xde1 src/Standard_Demos_and_Utils/FreeRTOS_Plus_CLI_Demos/UDPCommandConsole.o
+ .debug_info    0x0000000000037e72      0xecc src/Standard_Demos_and_Utils/FreeRTOS_Plus_TCP_Demos/SimpleTCPEchoServer.o
+ .debug_info    0x0000000000038d3e      0xfc5 src/Standard_Demos_and_Utils/FreeRTOS_Plus_TCP_Demos/TCPEchoClient_SingleTasks.o
+ .debug_info    0x0000000000039d03      0x280 src/Standard_Demos_and_Utils/FreeRTOS_Plus_TCP_Demos/TraceMacros/Example1/DemoIPTrace.o
+ .debug_info    0x0000000000039f83     0x147e src/Standard_Demos_and_Utils/Utilities/UDPLoggingPrintf.o
+ .debug_info    0x000000000003b401      0x9f4 src/Standard_Demos_and_Utils/Utilities/date_and_time.o
+ .debug_info    0x000000000003bdf5     0x12d5 src/Standard_Demos_and_Utils/Utilities/printf-stdarg.o
+ .debug_info    0x000000000003d0ca     0x12e7 src/hr_gettime.o
+ .debug_info    0x000000000003e3b1     0x26b1 src/main.o
 
 .debug_abbrev   0x0000000000000000     0x7b41
  .debug_abbrev  0x0000000000000000       0x12 src/Drivers/CMSIS/Device/ST/STM32F4xx/Source/Templates/gcc/startup_stm32f407xx.o

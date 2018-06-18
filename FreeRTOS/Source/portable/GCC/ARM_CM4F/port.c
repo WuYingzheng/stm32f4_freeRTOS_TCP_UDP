@@ -242,7 +242,8 @@ StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t px
 	*/
 	pxTopOfStack--;
 
-	*pxTopOfStack = portINITIAL_XPSR;	/* xPSR */
+	//关于这个寄存器参考 https://blog.csdn.net/u010893262/article/details/52808639
+	*pxTopOfStack = portINITIAL_XPSR;	/* 程序状态寄存器 xPSR */
 	pxTopOfStack--;
 	*pxTopOfStack = ( ( StackType_t ) pxCode ) & portSTART_ADDRESS_MASK;	/* PC */
 	pxTopOfStack--;
@@ -250,10 +251,10 @@ StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t px
 
 	/* Save code space by skipping register initialisation. */
 	pxTopOfStack -= 5;	/* R12, R3, R2 and R1. */
-	*pxTopOfStack = ( StackType_t ) pvParameters;	/* R0 */
+	*pxTopOfStack = ( StackType_t ) pvParameters;	/* 参数传递 R0 */
 
-	/* A save method is being used that requires each task to maintain its
-	own exec return value. */
+	/* A save method is being used that requires each task to maintain its own exec return value. */
+	//用于保存返回值...不太清除
 	pxTopOfStack--;
 	*pxTopOfStack = portINITIAL_EXEC_RETURN;
 

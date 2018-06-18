@@ -27,23 +27,23 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY
  11 .debug_line   00012428  00000000  00000000  00020378  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_info   00040a6a  00000000  00000000  000327a0  2**0
+ 12 .debug_info   00040a62  00000000  00000000  000327a0  2**0
                   CONTENTS, READONLY, DEBUGGING
- 13 .debug_abbrev 00007b41  00000000  00000000  0007320a  2**0
+ 13 .debug_abbrev 00007b41  00000000  00000000  00073202  2**0
                   CONTENTS, READONLY, DEBUGGING
- 14 .debug_aranges 000017c0  00000000  00000000  0007ad50  2**3
+ 14 .debug_aranges 000017c0  00000000  00000000  0007ad48  2**3
                   CONTENTS, READONLY, DEBUGGING
- 15 .debug_ranges 000024b0  00000000  00000000  0007c510  2**3
+ 15 .debug_ranges 000024b0  00000000  00000000  0007c508  2**3
                   CONTENTS, READONLY, DEBUGGING
- 16 .debug_loc    0001ee46  00000000  00000000  0007e9c0  2**0
+ 16 .debug_loc    0001ee46  00000000  00000000  0007e9b8  2**0
                   CONTENTS, READONLY, DEBUGGING
- 17 .debug_str    0000c03d  00000000  00000000  0009d806  2**0
+ 17 .debug_str    0000c03d  00000000  00000000  0009d7fe  2**0
                   CONTENTS, READONLY, DEBUGGING
- 18 .comment      0000007c  00000000  00000000  000a9843  2**0
+ 18 .comment      0000007c  00000000  00000000  000a983b  2**0
                   CONTENTS, READONLY
- 19 .debug_frame  000049ac  00000000  00000000  000a98c0  2**2
+ 19 .debug_frame  000049ac  00000000  00000000  000a98b8  2**2
                   CONTENTS, READONLY, DEBUGGING
- 20 .stabstr      000000df  00000000  00000000  000ae26c  2**0
+ 20 .stabstr      000000df  00000000  00000000  000ae264  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -20884,20 +20884,18 @@ void vListInitialise( List_t * const pxList )
  8008e44:	f100 0308 	add.w	r3, r0, #8
  8008e48:	6043      	str	r3, [r0, #4]
 
-	/* The list end value is the highest possible value in the list to
-	ensure it remains at the end of the list. */
-	pxList->xListEnd.xItemValue = portMAX_DELAY;
+	/* The list end value is the highest possible value in the list to ensure it remains at the end of the list. */
+	pxList->xListEnd.xItemValue = portMAX_DELAY; //设置成可能的最大值，以确保 xListEnd 在队列的最后
  8008e4a:	f04f 32ff 	mov.w	r2, #4294967295	; 0xffffffff
  8008e4e:	6082      	str	r2, [r0, #8]
 
-	/* The list end next and previous pointers point to itself so we know
-	when the list is empty. */
+	/* The list end next and previous pointers point to itself so we know when the list is empty. */
 	pxList->xListEnd.pxNext = ( ListItem_t * ) &( pxList->xListEnd );	/*lint !e826 !e740 The mini list structure is used as the list end to save RAM.  This is checked and valid. */
  8008e50:	60c3      	str	r3, [r0, #12]
 	pxList->xListEnd.pxPrevious = ( ListItem_t * ) &( pxList->xListEnd );/*lint !e826 !e740 The mini list structure is used as the list end to save RAM.  This is checked and valid. */
  8008e52:	6103      	str	r3, [r0, #16]
 
-	pxList->uxNumberOfItems = ( UBaseType_t ) 0U;
+	pxList->uxNumberOfItems = ( UBaseType_t ) 0U; //队列实体数量为0
  8008e54:	2300      	movs	r3, #0
  8008e56:	6003      	str	r3, [r0, #0]
  8008e58:	4770      	bx	lr
@@ -20908,7 +20906,7 @@ void vListInitialise( List_t * const pxList )
 void vListInitialiseItem( ListItem_t * const pxItem )
 {
 	/* Make sure the list item is not recorded as being on a list. */
-	pxItem->pvContainer = NULL;
+	pxItem->pvContainer = NULL; //确保队列对象没有被任何队列包含
  8008e5a:	2300      	movs	r3, #0
  8008e5c:	6103      	str	r3, [r0, #16]
  8008e5e:	4770      	bx	lr
@@ -20916,7 +20914,7 @@ void vListInitialiseItem( ListItem_t * const pxItem )
 08008e60 <vListInsertEnd>:
 }
 /*-----------------------------------------------------------*/
-
+//将队列对象插入到一个队列的最后
 void vListInsertEnd( List_t * const pxList, ListItem_t * const pxNewListItem )
 {
 ListItem_t * const pxIndex = pxList->pxIndex;
@@ -20952,20 +20950,21 @@ ListItem_t * const pxIndex = pxList->pxIndex;
  8008e76:	4770      	bx	lr
 
 08008e78 <vListInsert>:
-}
-/*-----------------------------------------------------------*/
-
+ * 调用API函数vListInsert( List_t * const pxList, ListItem_t * const pxNewListItem)可以将
+ * pxNewListItem指向的列表项插入到pxList指向的列表中，列表项在列表的位置由pxNewListItem->xItemValue
+ * 决定，按照降序排列。
+ */
 void vListInsert( List_t * const pxList, ListItem_t * const pxNewListItem )
 {
  8008e78:	b410      	push	{r4}
-ListItem_t *pxIterator;
+ListItem_t *pxIterator; //迭代标志
 const TickType_t xValueOfInsertion = pxNewListItem->xItemValue;
  8008e7a:	680c      	ldr	r4, [r1, #0]
-	new list item should be placed after it.  This ensures that TCB's which are
 	stored in ready lists (all of which have the same xItemValue value) get a
 	share of the CPU.  However, if the xItemValue is the same as the back marker
-	the iteration loop below will not end.  Therefore the value is checked
+	the iteration loop 迭代循环 below will not end.  Therefore the value is checked
 	first, and the algorithm slightly modified if necessary. */
+	//首先检查 xValueOfInsertion 的值，确保下面的循环可以结束
 	if( xValueOfInsertion == portMAX_DELAY )
  8008e7c:	f1b4 3fff 	cmp.w	r4, #4294967295	; 0xffffffff
  8008e80:	d017      	beq.n	8008eb2 <vListInsert+0x3a>
@@ -23509,7 +23508,7 @@ const TickType_t xConstTickCount = xTickCount;
 	}
  8009eee:	e7e6      	b.n	8009ebe <vTaskDelete+0x7a>
 				configASSERT( uxSchedulerSuspended == 0 );
- 8009ef0:	f240 4166 	movw	r1, #1126	; 0x466
+ 8009ef0:	f240 4129 	movw	r1, #1065	; 0x429
  8009ef4:	480b      	ldr	r0, [pc, #44]	; (8009f24 <vTaskDelete+0xe0>)
  8009ef6:	f002 fa3d 	bl	800c374 <vAssertCalled>
  8009efa:	e7f0      	b.n	8009ede <vTaskDelete+0x9a>
@@ -23566,7 +23565,7 @@ const TickType_t xConstTickCount = xTickCount;
  8009f62:	2001      	movne	r0, #1
  8009f64:	bd38      	pop	{r3, r4, r5, pc}
 		configASSERT( pxTCB );
- 8009f66:	f240 41fc 	movw	r1, #1276	; 0x4fc
+ 8009f66:	f240 41bf 	movw	r1, #1215	; 0x4bf
  8009f6a:	480e      	ldr	r0, [pc, #56]	; (8009fa4 <eTaskGetState+0x7c>)
  8009f6c:	f002 fa02 	bl	800c374 <vAssertCalled>
  8009f70:	e7dd      	b.n	8009f2e <eTaskGetState+0x6>
@@ -23641,7 +23640,7 @@ const TickType_t xConstTickCount = xTickCount;
  8009ff2:	f7ff f859 	bl	80090a8 <xPortStartScheduler>
  8009ff6:	e7e7      	b.n	8009fc8 <vTaskStartScheduler+0x20>
 		configASSERT( xReturn != errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY );
- 8009ff8:	f44f 61f1 	mov.w	r1, #1928	; 0x788
+ 8009ff8:	f240 714b 	movw	r1, #1867	; 0x74b
  8009ffc:	4807      	ldr	r0, [pc, #28]	; (800a01c <vTaskStartScheduler+0x74>)
  8009ffe:	f002 f9b9 	bl	800c374 <vAssertCalled>
 }
@@ -23688,7 +23687,7 @@ const TickType_t xConstTickCount = xTickCount;
 	configASSERT( pxTCB );
  800a04c:	2c00      	cmp	r4, #0
  800a04e:	d1f8      	bne.n	800a042 <pcTaskGetName+0x6>
- 800a050:	f44f 6109 	mov.w	r1, #2192	; 0x890
+ 800a050:	f640 0153 	movw	r1, #2131	; 0x853
  800a054:	4802      	ldr	r0, [pc, #8]	; (800a060 <pcTaskGetName+0x24>)
  800a056:	f002 f98d 	bl	800c374 <vAssertCalled>
  800a05a:	e7f2      	b.n	800a042 <pcTaskGetName+0x6>
@@ -23784,7 +23783,7 @@ BaseType_t xSwitchRequired = pdFALSE;
  800a100:	6013      	str	r3, [r2, #0]
  800a102:	e7bc      	b.n	800a07e <xTaskIncrementTick+0x1a>
 			taskSWITCH_DELAYED_LISTS();
- 800a104:	f640 11dd 	movw	r1, #2525	; 0x9dd
+ 800a104:	f44f 611a 	mov.w	r1, #2464	; 0x9a0
  800a108:	4830      	ldr	r0, [pc, #192]	; (800a1cc <xTaskIncrementTick+0x168>)
  800a10a:	f002 f933 	bl	800c374 <vAssertCalled>
  800a10e:	e7c9      	b.n	800a0a4 <xTaskIncrementTick+0x40>
@@ -23946,7 +23945,7 @@ BaseType_t xSwitchRequired = pdFALSE;
  800a244:	601a      	str	r2, [r3, #0]
  800a246:	e7dc      	b.n	800a202 <xTaskResumeAll+0x2e>
 	configASSERT( uxSchedulerSuspended );
- 800a248:	f240 71ec 	movw	r1, #2028	; 0x7ec
+ 800a248:	f240 71af 	movw	r1, #1967	; 0x7af
  800a24c:	481d      	ldr	r0, [pc, #116]	; (800a2c4 <xTaskResumeAll+0xf0>)
  800a24e:	f002 f891 	bl	800c374 <vAssertCalled>
  800a252:	e7c5      	b.n	800a1e0 <xTaskResumeAll+0xc>
@@ -24043,7 +24042,7 @@ BaseType_t xAlreadyYielded = pdFALSE;
  800a2fe:	f3bf 8f6f 	isb	sy
  800a302:	bd10      	pop	{r4, pc}
 			configASSERT( uxSchedulerSuspended == 0 );
- 800a304:	f44f 619a 	mov.w	r1, #1232	; 0x4d0
+ 800a304:	f240 4193 	movw	r1, #1171	; 0x493
  800a308:	4803      	ldr	r0, [pc, #12]	; (800a318 <vTaskDelay+0x44>)
  800a30a:	f002 f833 	bl	800c374 <vAssertCalled>
  800a30e:	e7e7      	b.n	800a2e0 <vTaskDelay+0xc>
@@ -24210,7 +24209,7 @@ BaseType_t xAlreadyYielded = pdFALSE;
  800a44a:	d1c7      	bne.n	800a3dc <vTaskSwitchContext+0x40>
  800a44c:	e7cc      	b.n	800a3e8 <vTaskSwitchContext+0x4c>
 		taskSELECT_HIGHEST_PRIORITY_TASK();
- 800a44e:	f640 21fa 	movw	r1, #2810	; 0xafa
+ 800a44e:	f640 21bd 	movw	r1, #2749	; 0xabd
  800a452:	480b      	ldr	r0, [pc, #44]	; (800a480 <vTaskSwitchContext+0xe4>)
  800a454:	f001 ff8e 	bl	800c374 <vAssertCalled>
  800a458:	e7d3      	b.n	800a402 <vTaskSwitchContext+0x66>
@@ -24247,7 +24246,7 @@ BaseType_t xAlreadyYielded = pdFALSE;
  800a49c:	f7ff fb88 	bl	8009bb0 <prvAddCurrentTaskToDelayedList>
  800a4a0:	bd38      	pop	{r3, r4, r5, pc}
 	configASSERT( pxEventList );
- 800a4a2:	f640 310a 	movw	r1, #2826	; 0xb0a
+ 800a4a2:	f640 21cd 	movw	r1, #2765	; 0xacd
  800a4a6:	4803      	ldr	r0, [pc, #12]	; (800a4b4 <vTaskPlaceOnEventList+0x30>)
  800a4a8:	f001 ff64 	bl	800c374 <vAssertCalled>
  800a4ac:	e7ee      	b.n	800a48c <vTaskPlaceOnEventList+0x8>
@@ -24283,12 +24282,12 @@ BaseType_t xAlreadyYielded = pdFALSE;
  800a4e0:	f7ff fb66 	bl	8009bb0 <prvAddCurrentTaskToDelayedList>
  800a4e4:	bd70      	pop	{r4, r5, r6, pc}
 	configASSERT( pxEventList );
- 800a4e6:	f640 311b 	movw	r1, #2843	; 0xb1b
+ 800a4e6:	f640 21de 	movw	r1, #2782	; 0xade
  800a4ea:	4807      	ldr	r0, [pc, #28]	; (800a508 <vTaskPlaceOnUnorderedEventList+0x50>)
  800a4ec:	f001 ff42 	bl	800c374 <vAssertCalled>
  800a4f0:	e7e7      	b.n	800a4c2 <vTaskPlaceOnUnorderedEventList+0xa>
 	configASSERT( uxSchedulerSuspended != 0 );
- 800a4f2:	f640 311f 	movw	r1, #2847	; 0xb1f
+ 800a4f2:	f640 21e2 	movw	r1, #2786	; 0xae2
  800a4f6:	4804      	ldr	r0, [pc, #16]	; (800a508 <vTaskPlaceOnUnorderedEventList+0x50>)
  800a4f8:	f001 ff3c 	bl	800c374 <vAssertCalled>
  800a4fc:	e7e4      	b.n	800a4c8 <vTaskPlaceOnUnorderedEventList+0x10>
@@ -24346,7 +24345,7 @@ BaseType_t xAlreadyYielded = pdFALSE;
 }
  800a55e:	bd38      	pop	{r3, r4, r5, pc}
 	configASSERT( pxUnblockedTCB );
- 800a560:	f640 3165 	movw	r1, #2917	; 0xb65
+ 800a560:	f640 3128 	movw	r1, #2856	; 0xb28
  800a564:	4809      	ldr	r0, [pc, #36]	; (800a58c <xTaskRemoveFromEventList+0x80>)
  800a566:	f001 ff05 	bl	800c374 <vAssertCalled>
  800a56a:	e7d3      	b.n	800a514 <xTaskRemoveFromEventList+0x8>
@@ -24413,12 +24412,12 @@ BaseType_t xAlreadyYielded = pdFALSE;
  800a5e6:	601a      	str	r2, [r3, #0]
  800a5e8:	bd38      	pop	{r3, r4, r5, pc}
 	configASSERT( uxSchedulerSuspended != pdFALSE );
- 800a5ea:	f640 319c 	movw	r1, #2972	; 0xb9c
+ 800a5ea:	f640 315f 	movw	r1, #2911	; 0xb5f
  800a5ee:	480a      	ldr	r0, [pc, #40]	; (800a618 <vTaskRemoveFromUnorderedEventList+0x84>)
  800a5f0:	f001 fec0 	bl	800c374 <vAssertCalled>
  800a5f4:	e7d4      	b.n	800a5a0 <vTaskRemoveFromUnorderedEventList+0xc>
 	configASSERT( pxUnblockedTCB );
- 800a5f6:	f640 31a4 	movw	r1, #2980	; 0xba4
+ 800a5f6:	f640 3167 	movw	r1, #2919	; 0xb67
  800a5fa:	4807      	ldr	r0, [pc, #28]	; (800a618 <vTaskRemoveFromUnorderedEventList+0x84>)
  800a5fc:	f001 feba 	bl	800c374 <vAssertCalled>
  800a600:	e7d3      	b.n	800a5aa <vTaskRemoveFromUnorderedEventList+0x16>
@@ -24446,7 +24445,7 @@ BaseType_t xAlreadyYielded = pdFALSE;
  800a62c:	6063      	str	r3, [r4, #4]
  800a62e:	bd10      	pop	{r4, pc}
 	configASSERT( pxTimeOut );
- 800a630:	f640 31ba 	movw	r1, #3002	; 0xbba
+ 800a630:	f640 317d 	movw	r1, #2941	; 0xb7d
  800a634:	4803      	ldr	r0, [pc, #12]	; (800a644 <vTaskSetTimeOutState+0x28>)
  800a636:	f001 fe9d 	bl	800c374 <vAssertCalled>
  800a63a:	e7f2      	b.n	800a622 <vTaskSetTimeOutState+0x6>
@@ -24494,12 +24493,12 @@ BaseType_t xAlreadyYielded = pdFALSE;
  800a680:	4620      	mov	r0, r4
  800a682:	bd38      	pop	{r3, r4, r5, pc}
 	configASSERT( pxTimeOut );
- 800a684:	f640 31c4 	movw	r1, #3012	; 0xbc4
+ 800a684:	f640 3187 	movw	r1, #2951	; 0xb87
  800a688:	480c      	ldr	r0, [pc, #48]	; (800a6bc <xTaskCheckForTimeOut+0x74>)
  800a68a:	f001 fe73 	bl	800c374 <vAssertCalled>
  800a68e:	e7df      	b.n	800a650 <xTaskCheckForTimeOut+0x8>
 	configASSERT( pxTicksToWait );
- 800a690:	f640 31c5 	movw	r1, #3013	; 0xbc5
+ 800a690:	f640 3188 	movw	r1, #2952	; 0xb88
  800a694:	4809      	ldr	r0, [pc, #36]	; (800a6bc <xTaskCheckForTimeOut+0x74>)
  800a696:	f001 fe6d 	bl	800c374 <vAssertCalled>
  800a69a:	e7da      	b.n	800a652 <xTaskCheckForTimeOut+0xa>
@@ -24897,7 +24896,7 @@ BaseType_t xAlreadyYielded = pdFALSE;
  800a962:	681b      	ldr	r3, [r3, #0]
  800a964:	4298      	cmp	r0, r3
  800a966:	d004      	beq.n	800a972 <xTaskPriorityDisinherit+0x1a>
- 800a968:	f44f 616c 	mov.w	r1, #3776	; 0xec0
+ 800a968:	f640 6183 	movw	r1, #3715	; 0xe83
  800a96c:	4822      	ldr	r0, [pc, #136]	; (800a9f8 <xTaskPriorityDisinherit+0xa0>)
  800a96e:	f001 fd01 	bl	800c374 <vAssertCalled>
 			configASSERT( pxTCB->uxMutexesHeld );
@@ -24919,7 +24918,7 @@ BaseType_t xAlreadyYielded = pdFALSE;
 	}
  800a988:	bd38      	pop	{r3, r4, r5, pc}
 			configASSERT( pxTCB->uxMutexesHeld );
- 800a98a:	f640 61c2 	movw	r1, #3778	; 0xec2
+ 800a98a:	f640 6185 	movw	r1, #3717	; 0xe85
  800a98e:	481a      	ldr	r0, [pc, #104]	; (800a9f8 <xTaskPriorityDisinherit+0xa0>)
  800a990:	f001 fcf0 	bl	800c374 <vAssertCalled>
  800a994:	e7ef      	b.n	800a976 <xTaskPriorityDisinherit+0x1e>
@@ -25326,7 +25325,7 @@ BaseType_t xAlreadyYielded = pdFALSE;
  800aca0:	e8df f002 	tbb	[pc, r2]
  800aca4:	18161208 	.word	0x18161208
 		configASSERT( xTaskToNotify );
- 800aca8:	f241 01f6 	movw	r1, #4342	; 0x10f6
+ 800aca8:	f241 01b9 	movw	r1, #4281	; 0x10b9
  800acac:	4822      	ldr	r0, [pc, #136]	; (800ad38 <xTaskGenericNotify+0xc0>)
  800acae:	f001 fb61 	bl	800c374 <vAssertCalled>
  800acb2:	e7e7      	b.n	800ac84 <xTaskGenericNotify+0xc>
@@ -25379,7 +25378,7 @@ BaseType_t xAlreadyYielded = pdFALSE;
 				configASSERT( listLIST_ITEM_CONTAINER( &( pxTCB->xEventListItem ) ) == NULL );
  800ad02:	6aa3      	ldr	r3, [r4, #40]	; 0x28
  800ad04:	b123      	cbz	r3, 800ad10 <xTaskGenericNotify+0x98>
- 800ad06:	f241 112e 	movw	r1, #4398	; 0x112e
+ 800ad06:	f241 01f1 	movw	r1, #4337	; 0x10f1
  800ad0a:	480b      	ldr	r0, [pc, #44]	; (800ad38 <xTaskGenericNotify+0xc0>)
  800ad0c:	f001 fb32 	bl	800c374 <vAssertCalled>
 				if( pxTCB->uxPriority > pxCurrentTCB->uxPriority )
@@ -25440,14 +25439,14 @@ BaseType_t xAlreadyYielded = pdFALSE;
  800ad82:	f385 8811 	msr	BASEPRI, r5
  800ad86:	bdf8      	pop	{r3, r4, r5, r6, r7, pc}
 		configASSERT( xTaskToNotify );
- 800ad88:	f241 11dc 	movw	r1, #4572	; 0x11dc
+ 800ad88:	f241 119f 	movw	r1, #4511	; 0x119f
  800ad8c:	481a      	ldr	r0, [pc, #104]	; (800adf8 <vTaskNotifyGiveFromISR+0xac>)
  800ad8e:	f001 faf1 	bl	800c374 <vAssertCalled>
  800ad92:	e7df      	b.n	800ad54 <vTaskNotifyGiveFromISR+0x8>
 				configASSERT( listLIST_ITEM_CONTAINER( &( pxTCB->xEventListItem ) ) == NULL );
  800ad94:	6aa3      	ldr	r3, [r4, #40]	; 0x28
  800ad96:	b123      	cbz	r3, 800ada2 <vTaskNotifyGiveFromISR+0x56>
- 800ad98:	f241 2102 	movw	r1, #4610	; 0x1202
+ 800ad98:	f241 11c5 	movw	r1, #4549	; 0x11c5
  800ad9c:	4816      	ldr	r0, [pc, #88]	; (800adf8 <vTaskNotifyGiveFromISR+0xac>)
  800ad9e:	f001 fae9 	bl	800c374 <vAssertCalled>
 				if( uxSchedulerSuspended == ( UBaseType_t ) pdFALSE )

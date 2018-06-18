@@ -256,6 +256,7 @@ extern "C" {
 	#define configUSE_ALTERNATIVE_API 0
 #endif
 
+//是否在TCB中使用临界嵌套
 #ifndef portCRITICAL_NESTING_IN_TCB
 	#define portCRITICAL_NESTING_IN_TCB 0
 #endif
@@ -744,6 +745,7 @@ extern "C" {
 	#define configUSE_TRACE_FACILITY 0
 #endif
 
+//初始化任务名调用过
 #ifndef mtCOVERAGE_TEST_MARKER
 	#define mtCOVERAGE_TEST_MARKER()
 #endif
@@ -773,7 +775,7 @@ extern "C" {
 #endif
 
 #ifndef configSUPPORT_STATIC_ALLOCATION
-	/* Defaults to 0 for backward compatibility. */
+	/* Defaults to 0 for backward compatibility. 静态的创建任务 */
 	#define configSUPPORT_STATIC_ALLOCATION 0
 #endif
 
