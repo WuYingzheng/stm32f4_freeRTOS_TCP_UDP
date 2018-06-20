@@ -1,0 +1,4 @@
+  这个仓库FreeRTOS源码的添加中文注释
+
+  源码编译可以运行在STM32F407zgt6上，LED灯闪烁，网卡可以PING通。
+  开发板淘宝链接：https://item.taobao.com/item.htm?spm=a230r.1.14.20.26223b01Y3c7ou&id=565644828969&ns=1&abbucket=5#detail
