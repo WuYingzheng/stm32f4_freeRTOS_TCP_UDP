@@ -411,10 +411,11 @@ extern "C" {
 
 /* The following event macros are embedded in the kernel API calls. */
 
+//跟踪函数，将任务加入到就绪列表
 #ifndef traceMOVED_TASK_TO_READY_STATE
 	#define traceMOVED_TASK_TO_READY_STATE( pxTCB )
 #endif
-
+//跟踪函数，将任务加入到就绪列表已经完成
 #ifndef tracePOST_MOVED_TASK_TO_READY_STATE
 	#define tracePOST_MOVED_TASK_TO_READY_STATE( pxTCB )
 #endif
@@ -506,7 +507,7 @@ extern "C" {
 #ifndef traceQUEUE_DELETE
 	#define traceQUEUE_DELETE( pxQueue )
 #endif
-
+//用于跟踪任务的创建
 #ifndef traceTASK_CREATE
 	#define traceTASK_CREATE( pxNewTCB )
 #endif
@@ -726,7 +727,7 @@ extern "C" {
 #endif
 
 #ifndef configUSE_TIME_SLICING
-	#define configUSE_TIME_SLICING 1
+	#define configUSE_TIME_SLICING 1           //使用时间片
 #endif
 
 #ifndef configINCLUDE_APPLICATION_DEFINED_PRIVILEGED_FUNCTIONS
@@ -745,7 +746,7 @@ extern "C" {
 	#define configUSE_TRACE_FACILITY 0
 #endif
 
-//初始化任务名调用过
+//这个一个空的宏定义，多次插入在内核中，用户可以覆盖这个插入的地方，自定义过程的处理
 #ifndef mtCOVERAGE_TEST_MARKER
 	#define mtCOVERAGE_TEST_MARKER()
 #endif

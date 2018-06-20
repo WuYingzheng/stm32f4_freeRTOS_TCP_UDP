@@ -177,6 +177,7 @@ use of FreeRTOS.*/
 
 /*
  * Definition of the only type of object that a list can contain.
+ * 链表对象
  */
 struct xLIST_ITEM
 {
@@ -187,17 +188,18 @@ struct xLIST_ITEM
 	struct xLIST_ITEM * configLIST_VOLATILE pxPrevious;	/*< Pointer to the previous ListItem_t in the list. */
 	void * pvOwner;										/*< Pointer to the object (normally a TCB) that contains the list item.
 															There is therefore a two way link between the object containing the list item and the list item itself. */
-	void * configLIST_VOLATILE pvContainer;				/*< 指向包含该列表项的列表 Pointer to the list in which this list item is placed (if any). */
+	void * configLIST_VOLATILE pvContainer;				/*< 指向包含该链表项的链表 Pointer to the list in which this list item is placed (if any). */
 	listSECOND_LIST_ITEM_INTEGRITY_CHECK_VALUE			/*< 用于检测列表项数据是否完整 Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
 };
 typedef struct xLIST_ITEM ListItem_t;					/* For some reason lint wants this as two separate definitions. */
 
+//mini链表对象，除了缺少最后几项成员，成员的定义和上面的链表对象相同
 struct xMINI_LIST_ITEM
 {
 	listFIRST_LIST_ITEM_INTEGRITY_CHECK_VALUE			/*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
 	configLIST_VOLATILE TickType_t xItemValue;
-	struct xLIST_ITEM * configLIST_VOLATILE pxNext;
-	struct xLIST_ITEM * configLIST_VOLATILE pxPrevious;
+	struct xLIST_ITEM * configLIST_VOLATILE pxNext;     //链表对象 指向前一个链表对象
+	struct xLIST_ITEM * configLIST_VOLATILE pxPrevious; //链表对象 指向后一个链表对象
 };
 typedef struct xMINI_LIST_ITEM MiniListItem_t;
 
@@ -207,8 +209,10 @@ typedef struct xMINI_LIST_ITEM MiniListItem_t;
 typedef struct xLIST
 {
 	listFIRST_LIST_INTEGRITY_CHECK_VALUE				/*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
-	configLIST_VOLATILE UBaseType_t uxNumberOfItems;    //用来指示列表中列表项的数目
+	configLIST_VOLATILE UBaseType_t uxNumberOfItems;    //链表长度，用来指示列表中列表项的数目
+	//链表当前位置的索引，它总是指向最后的链表实体插入的地方      //在链表初始化时，指向了xListEnd
 	ListItem_t * configLIST_VOLATILE pxIndex;			/*< Used to walk through the list.  Points to the last item returned by a call to listGET_OWNER_OF_NEXT_ENTRY (). */
+    //xListEnd 的成员xItemValue包含了最大的可能值，因此它总在链表的最后。并且可以用于标记一个链表。
 	MiniListItem_t xListEnd;							/*< List item that contains the maximum possible item value meaning it is always at the end of the list and is therefore used as a marker. */
 	listSECOND_LIST_INTEGRITY_CHECK_VALUE				/*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
 } List_t;
@@ -362,7 +366,7 @@ List_t * const pxConstList = ( pxList );													\
 
 /*
  * Return the list a list item is contained within (referenced from).
- *
+ * 返回链表项所在的链表，
  * @param pxListItem The list item being queried.
  * @return A pointer to the List_t object that references the pxListItem
  */

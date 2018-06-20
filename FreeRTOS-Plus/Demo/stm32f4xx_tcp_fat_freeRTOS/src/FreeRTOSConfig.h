@@ -90,7 +90,7 @@ extern uint32_t SystemCoreClock;
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION	1
 #define configUSE_TICKLESS_IDLE					0
 #define configTICK_RATE_HZ						( 1000UL )
-#define configUSE_PREEMPTION					1
+#define configUSE_PREEMPTION					1  //是否使用抢占式内核
 #define configUSE_IDLE_HOOK						1
 #define configUSE_TICK_HOOK						1
 #define configMAX_PRIORITIES					( 7 )
@@ -320,7 +320,7 @@ extern uint32_t ulSeconds, ulMsec;
 		} \
 	}
 
-
+//如果调度器没有被挂起，每次更新 ms 和 s 的值
 #define traceTASK_INCREMENT_TICK( xTickCount ) \
 	if( uxSchedulerSuspended == ( UBaseType_t ) pdFALSE ) \
 	{ \

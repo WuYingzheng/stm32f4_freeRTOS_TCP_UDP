@@ -153,7 +153,7 @@ debugger. */
 #endif
 
 /* Each task maintains its own interrupt status in the critical nesting variable. */
-//该变量在 xPortStartScheduler() 被初始化为0
+//该变量在 xPortStartScheduler() 被初始化为0，内核的临界嵌套变量；如果配置了任务临界嵌套变量，每个任务会维护自己的临界嵌套变量
 static UBaseType_t uxCriticalNesting = 0xaaaaaaaa;
 
 /*
@@ -254,7 +254,7 @@ StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t px
 	*pxTopOfStack = ( StackType_t ) pvParameters;	/* 参数传递 R0 */
 
 	/* A save method is being used that requires each task to maintain its own exec return value. */
-	//用于保存返回值...不太清除
+	//用于保存返回值...不太清楚
 	pxTopOfStack--;
 	*pxTopOfStack = portINITIAL_EXEC_RETURN;
 
@@ -547,7 +547,7 @@ void xPortPendSVHandler( void )
 	);
 }
 /*-----------------------------------------------------------*/
-//挂起一个pendsv 异常，请求上下文切换
+//调用 xPortSysTickHandler(), 根据返回值判断是否需要触发一个 pendsv 异常，请求上下文切换
 void xPortSysTickHandler( void )
 {
 	/* The SysTick runs at the lowest interrupt priority, so when this interrupt

@@ -75,7 +75,7 @@
 /*-----------------------------------------------------------
  * PUBLIC LIST API documented in list.h
  *----------------------------------------------------------*/
-
+//初始化 ～链表～ ； List_t 结构体中的 xListEnd 成员，并且把链表的长度设置为0；
 void vListInitialise( List_t * const pxList )
 {
 	/* The list structure contains a list item which is used to mark the
@@ -98,14 +98,14 @@ void vListInitialise( List_t * const pxList )
 	listSET_LIST_INTEGRITY_CHECK_2_VALUE( pxList );
 }
 /*-----------------------------------------------------------*/
-
+//初始化 ～链表对象～ ：确保队列对象没有被任何队列包含
 void vListInitialiseItem( ListItem_t * const pxItem )
 {
 	/* Make sure the list item is not recorded as being on a list. */
 	pxItem->pvContainer = NULL; //确保队列对象没有被任何队列包含
 
 	/* Write known values into the list item if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
-	//写入一个已知值，确保数据的完整性
+	//写入一个已知值，用于检查数据的完整性
 	listSET_FIRST_LIST_ITEM_INTEGRITY_CHECK_VALUE( pxItem );
 	listSET_SECOND_LIST_ITEM_INTEGRITY_CHECK_VALUE( pxItem );
 }
@@ -118,6 +118,7 @@ ListItem_t * const pxIndex = pxList->pxIndex;
 	/* Only effective when configASSERT() is also defined, these tests may catch
 	the list data structures being overwritten in memory.  They will not catch
 	data errors caused by incorrect configuration or use of FreeRTOS. */
+	//下面两个宏并没有被定义
 	listTEST_LIST_INTEGRITY( pxList );
 	listTEST_LIST_ITEM_INTEGRITY( pxNewListItem );
 
@@ -134,7 +135,7 @@ ListItem_t * const pxIndex = pxList->pxIndex;
 	pxIndex->pxPrevious = pxNewListItem;
 
 	/* Remember which list the item is in. */
-	pxNewListItem->pvContainer = ( void * ) pxList;
+	pxNewListItem->pvContainer = ( void * ) pxList;  //赋值链表对象的载体>>--所属的链表
 
 	( pxList->uxNumberOfItems )++;
 }

@@ -78,7 +78,7 @@
 
 int iTimeZone;
 
-uint32_t ulSeconds, ulMsec;
+uint32_t ulSeconds, ulMsec;   //秒和毫秒
 
 /*
  * You can add the following code to you FreeRTOSConfig file:

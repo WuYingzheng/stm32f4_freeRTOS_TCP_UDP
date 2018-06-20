@@ -141,6 +141,7 @@ a statically allocated stack and a dynamically allocated TCB. */
 	performed in a way that is tailored to the particular microcontroller
 	architecture being used. */
 
+	//使用优化后的方法记录 就绪任务优先级，在 portmacro.h 中定义，使用为标记的方法
 	/* A port optimised version is provided.  Call the port defined macros. */
 	#define taskRECORD_READY_PRIORITY( uxPriority )	portRECORD_READY_PRIORITY( uxPriority, uxTopReadyPriority )
 
@@ -173,13 +174,13 @@ a statically allocated stack and a dynamically allocated TCB. */
 
 /*-----------------------------------------------------------*/
 
-/* pxDelayedTaskList and pxOverflowDelayedTaskList are switched when the tick
-count overflows. */
+/* pxDelayedTaskList and pxOverflowDelayedTaskList are switched when the tick count overflows. */
 #define taskSWITCH_DELAYED_LISTS()																	\
 {																									\
 	List_t *pxTemp;																					\
 																									\
-	/* The delayed tasks list should be empty when the lists are switched. */						\
+	/*不是很明白为什么要 pxDelayedTaskList 是空的
+	 * The delayed tasks list should be empty when the lists are switched. */						\
 	configASSERT( ( listLIST_IS_EMPTY( pxDelayedTaskList ) ) );										\
 																									\
 	pxTemp = pxDelayedTaskList;																		\
@@ -192,6 +193,7 @@ count overflows. */
 /*-----------------------------------------------------------*/
 
 /*
+ * 将任务插入到对应优先级链表的最后面
  * Place the task represented by pxTCB into the appropriate ready list for
  * the task.  It is inserted at the end of the list.
  */
@@ -236,9 +238,10 @@ typedef struct tskTaskControlBlock
 	#if ( portUSING_MPU_WRAPPERS == 1 )     //设置MPU，这个条目必须在结构体的第二项
 		xMPU_SETTINGS	xMPUSettings;		/*< The MPU settings are defined as part of the port layer.  THIS MUST BE THE SECOND MEMBER OF THE TCB STRUCT. */
 	#endif
-
-	ListItem_t			xStateListItem;	/*< 状态链表 The list that the state list item of a task is reference from denotes the state of that task (Ready, Blocked, Suspended ). */
-	ListItem_t			xEventListItem;		/*< 事件链表 Used to reference a task from an event list. */
+	/*< 状态链表 用来指示任务的三种状态： 就绪/阻塞/挂起 The list that the state list item of a task is reference from denotes the state of that task (Ready, Blocked, Suspended ). */
+	ListItem_t			xStateListItem;
+	/*< 事件链表，如果一个任务在等待一个事件，会把他放入事件链表 Used to reference a task from an event list. */
+	ListItem_t			xEventListItem;
 	UBaseType_t			uxPriority;			/*< 任务的优先级 The priority of the task.  0 is the lowest priority. */
 	StackType_t			*pxStack;			/*< 堆栈的起始地址 Points to the start of the stack. */
 	char				pcTaskName[ configMAX_TASK_NAME_LEN ];/*< Descriptive name given to the task when created.  Facilitates debugging only. */ /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
@@ -316,8 +319,10 @@ PRIVILEGED_DATA static List_t pxReadyTasksLists[ configMAX_PRIORITIES ];/*< Prio
 //有两个延迟链表，一个用来记录滴答计时器溢出的延迟链表
 PRIVILEGED_DATA static List_t xDelayedTaskList1;						/*< Delayed tasks. */
 PRIVILEGED_DATA static List_t xDelayedTaskList2;						/*< Delayed tasks (two lists are used - one for delays that have overflowed the current tick count. */
+//下面两个链表用来指向上面的两个链表，在计时器溢出时，交换上面的两个链表
 PRIVILEGED_DATA static List_t * volatile pxDelayedTaskList;				/*< Points to the delayed task list currently being used. */
 PRIVILEGED_DATA static List_t * volatile pxOverflowDelayedTaskList;		/*< Points to the delayed task list currently being used to hold tasks that have overflowed the current tick count. */
+
 PRIVILEGED_DATA static List_t xPendingReadyList;						/*< Tasks that have been readied while the scheduler was suspended.  They will be moved to the ready list when the scheduler is resumed. */
 
 #if( INCLUDE_vTaskDelete == 1 )
@@ -335,13 +340,13 @@ PRIVILEGED_DATA static List_t xPendingReadyList;						/*< Tasks that have been r
 
 /* Other file private variables. --------------------------------*/
 PRIVILEGED_DATA static volatile UBaseType_t uxCurrentNumberOfTasks 	= ( UBaseType_t ) 0U;
-PRIVILEGED_DATA static volatile TickType_t xTickCount 				= ( TickType_t ) 0U;
-PRIVILEGED_DATA static volatile UBaseType_t uxTopReadyPriority 		= tskIDLE_PRIORITY;
+PRIVILEGED_DATA static volatile TickType_t xTickCount 				= ( TickType_t ) 0U; //滴答计时器
+PRIVILEGED_DATA static volatile UBaseType_t uxTopReadyPriority 		= tskIDLE_PRIORITY;  //就绪任务的最高优先级变量，通过 位标志 来设置
 PRIVILEGED_DATA static volatile BaseType_t xSchedulerRunning 		= pdFALSE;
-PRIVILEGED_DATA static volatile UBaseType_t uxPendedTicks 			= ( UBaseType_t ) 0U;
-PRIVILEGED_DATA static volatile BaseType_t xYieldPending 			= pdFALSE;
-PRIVILEGED_DATA static volatile BaseType_t xNumOfOverflows 			= ( BaseType_t ) 0;
-PRIVILEGED_DATA static UBaseType_t uxTaskNumber 					= ( UBaseType_t ) 0U;
+PRIVILEGED_DATA static volatile UBaseType_t uxPendedTicks 			= ( UBaseType_t ) 0U; //如果调度器被挂起，每次滴答 uxPendedTicks++
+PRIVILEGED_DATA static volatile BaseType_t xYieldPending 			= pdFALSE;            //产生挂起标记
+PRIVILEGED_DATA static volatile BaseType_t xNumOfOverflows 			= ( BaseType_t ) 0;  //计时器溢出的次数
+PRIVILEGED_DATA static UBaseType_t uxTaskNumber 					= ( UBaseType_t ) 0U; //任务号，每次创建一个任务时就会++，
 PRIVILEGED_DATA static volatile TickType_t xNextTaskUnblockTime		= ( TickType_t ) 0U; /* Initialised to portMAX_DELAY before the scheduler starts. */
 PRIVILEGED_DATA static TaskHandle_t xIdleTaskHandle					= NULL;			/*< Holds the handle of the idle task.  The idle task is created automatically when the scheduler is started. */
 
@@ -917,10 +922,10 @@ static void prvAddNewTaskToReadyList( TCB_t *pxNewTCB )
 {
 	/* Ensure interrupts don't access the task lists while the lists are being
 	updated. */
-	taskENTER_CRITICAL();
+	taskENTER_CRITICAL(); //进入临界嵌套区
 	{
-		uxCurrentNumberOfTasks++;
-		if( pxCurrentTCB == NULL )
+		uxCurrentNumberOfTasks++; //当前任务的数量++
+		if( pxCurrentTCB == NULL ) //如果没有任务正在运行，或者都处于挂起状态
 		{
 			/* There are no other tasks, or all the other tasks are in
 			the suspended state - make this the current task. */
@@ -931,6 +936,7 @@ static void prvAddNewTaskToReadyList( TCB_t *pxNewTCB )
 				/* This is the first task to be created so do the preliminary
 				initialisation required.  We will not recover if this call
 				fails, but we will report the failure. */
+				//第一个任务，系统执行必要的初始化
 				prvInitialiseTaskLists();
 			}
 			else
@@ -938,16 +944,16 @@ static void prvAddNewTaskToReadyList( TCB_t *pxNewTCB )
 				mtCOVERAGE_TEST_MARKER();
 			}
 		}
-		else
+		else //有任务正在运行
 		{
 			/* If the scheduler is not already running, make this task the
 			current task if it is the highest priority task to be created
 			so far. */
-			if( xSchedulerRunning == pdFALSE )
+			if( xSchedulerRunning == pdFALSE ) //如果调度器没有运行
 			{
-				if( pxCurrentTCB->uxPriority <= pxNewTCB->uxPriority )
+				if( pxCurrentTCB->uxPriority <= pxNewTCB->uxPriority ) //并且新的任务具有更高的优先级
 				{
-					pxCurrentTCB = pxNewTCB;
+					pxCurrentTCB = pxNewTCB;  //将新任务置为当前任务
 				}
 				else
 				{
@@ -968,11 +974,11 @@ static void prvAddNewTaskToReadyList( TCB_t *pxNewTCB )
 			pxNewTCB->uxTCBNumber = uxTaskNumber;
 		}
 		#endif /* configUSE_TRACE_FACILITY */
-		traceTASK_CREATE( pxNewTCB );
+		traceTASK_CREATE( pxNewTCB );  //自定义的函数，用于跟踪任务的创建
 
-		prvAddTaskToReadyList( pxNewTCB );
+		prvAddTaskToReadyList( pxNewTCB );  //将任务插入到对应优先级的任务链表中
 
-		portSETUP_TCB( pxNewTCB );
+		portSETUP_TCB( pxNewTCB ); //将 TCB 指针设置为 void  ...不是很清楚
 	}
 	taskEXIT_CRITICAL();
 
@@ -982,7 +988,7 @@ static void prvAddNewTaskToReadyList( TCB_t *pxNewTCB )
 		then it should run now. */
 		if( pxCurrentTCB->uxPriority < pxNewTCB->uxPriority )
 		{
-			taskYIELD_IF_USING_PREEMPTION();
+			taskYIELD_IF_USING_PREEMPTION();   // 调用 portYIELD() ，切换上下文
 		}
 		else
 		{
@@ -2461,17 +2467,17 @@ BaseType_t xSwitchRequired = pdFALSE;
 	/* Called by the portable layer each time a tick interrupt occurs.
 	Increments the tick then checks to see if the new tick value will cause any
 	tasks to be unblocked. */
-	traceTASK_INCREMENT_TICK( xTickCount );
-	if( uxSchedulerSuspended == ( UBaseType_t ) pdFALSE )
+	traceTASK_INCREMENT_TICK( xTickCount );   //  更新 ms \ s 的值
+	if( uxSchedulerSuspended == ( UBaseType_t ) pdFALSE ) //如果调度器没有被挂起
 	{
-		/* Minor optimisation.  The tick count cannot change in this
-		block. */
+		/* Minor optimisation.  The tick count cannot change in this block.
+		 * 小的优化，滴答计时器不能在这部分更改 */
 		const TickType_t xConstTickCount = xTickCount + ( TickType_t ) 1;
 
-		/* Increment the RTOS tick, switching the delayed and overflowed
-		delayed lists if it wraps to 0. */
+		/* Increment the RTOS tick, switching the delayed and overflowed delayed lists if it wraps to 0. */
+		//通过上面的优化方案减小切换延迟和溢出延时（猜测）
 		xTickCount = xConstTickCount;
-
+        //如果计时器溢出，切换延时链表，根新阻塞时间。
 		if( xConstTickCount == ( TickType_t ) 0U ) /*lint !e774 'if' does not always evaluate to false as it is looking for an overflow. */
 		{
 			taskSWITCH_DELAYED_LISTS();
@@ -2481,7 +2487,8 @@ BaseType_t xSwitchRequired = pdFALSE;
 			mtCOVERAGE_TEST_MARKER();
 		}
 
-		/* See if this tick has made a timeout expire.  Tasks are stored in
+		/* 下面的if语句判断是否有阻塞的进程已经超时
+		 * See if this tick has made a timeout expire.  Tasks are stored in
 		the	queue in the order of their wake time - meaning once one task
 		has been found whose block time has not expired there is no need to
 		look any further down the list. */
@@ -2491,11 +2498,7 @@ BaseType_t xSwitchRequired = pdFALSE;
 			{
 				if( listLIST_IS_EMPTY( pxDelayedTaskList ) != pdFALSE )
 				{
-					/* The delayed list is empty.  Set xNextTaskUnblockTime
-					to the maximum possible value so it is extremely
-					unlikely that the
-					if( xTickCount >= xNextTaskUnblockTime ) test will pass
-					next time through. */
+					/* 一种冗余的保护设计，用于兼容不同的移植层 */
 					xNextTaskUnblockTime = portMAX_DELAY; /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
 					break;
 				}
@@ -2505,9 +2508,13 @@ BaseType_t xSwitchRequired = pdFALSE;
 					item at the head of the delayed list.  This is the time
 					at which the task at the head of the delayed list must
 					be removed from the Blocked state. */
+					//取出链表的第一项
 					pxTCB = ( TCB_t * ) listGET_OWNER_OF_HEAD_ENTRY( pxDelayedTaskList );
+					//获取状态列表的对象值
 					xItemValue = listGET_LIST_ITEM_VALUE( &( pxTCB->xStateListItem ) );
 
+					//如果滴答计时器的值小于 xItemValue，表示阻塞事件还没有到
+					//那么更新阻塞时间，退出for循环
 					if( xConstTickCount < xItemValue )
 					{
 						/* It is not time to unblock this item yet, but the
@@ -2528,18 +2535,18 @@ BaseType_t xSwitchRequired = pdFALSE;
 
 					/* Is the task waiting on an event also?  If so remove
 					it from the event list. */
+					//检测这个任务是否在等待一个事件，如果是，将任务从事件链表中删除。
 					if( listLIST_ITEM_CONTAINER( &( pxTCB->xEventListItem ) ) != NULL )
 					{
-						( void ) uxListRemove( &( pxTCB->xEventListItem ) );
+						( void ) uxListRemove( &( pxTCB->xEventListItem ) );  //将任务从事件等待链表中移除
 					}
 					else
 					{
 						mtCOVERAGE_TEST_MARKER();
 					}
 
-					/* Place the unblocked task into the appropriate ready
-					list. */
-					prvAddTaskToReadyList( pxTCB );
+					/* Place the unblocked task into the appropriate ready list. */
+					prvAddTaskToReadyList( pxTCB ); //将任务插入对应的优先级链表
 
 					/* A task being unblocked cannot cause an immediate
 					context switch if preemption is turned off. */
@@ -2551,7 +2558,7 @@ BaseType_t xSwitchRequired = pdFALSE;
 						currently executing task. */
 						if( pxTCB->uxPriority >= pxCurrentTCB->uxPriority )
 						{
-							xSwitchRequired = pdTRUE;
+							xSwitchRequired = pdTRUE;  //过程返回时需要进行上下文切换
 						}
 						else
 						{
@@ -2560,14 +2567,15 @@ BaseType_t xSwitchRequired = pdFALSE;
 					}
 					#endif /* configUSE_PREEMPTION */
 				}
-			}
-		}
+			} //无限 for 循环
+		}  //end of "if( xConstTickCount >= xNextTaskUnblockTime )“
 
 		/* Tasks of equal priority to the currently running task will share
 		processing time (time slice) if preemption is on, and the application
 		writer has not explicitly turned time slicing off. */
 		#if ( ( configUSE_PREEMPTION == 1 ) && ( configUSE_TIME_SLICING == 1 ) )
 		{
+			//如果当前任务优先级下有多个任务，那么需要切换上下文
 			if( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ pxCurrentTCB->uxPriority ] ) ) > ( UBaseType_t ) 1 )
 			{
 				xSwitchRequired = pdTRUE;
@@ -2583,6 +2591,7 @@ BaseType_t xSwitchRequired = pdFALSE;
 		{
 			/* Guard against the tick hook being called when the pended tick
 			count is being unwound (when the scheduler is being unlocked). */
+			//调度器没有被挂起的情况下调用用户的滴答钩子函数
 			if( uxPendedTicks == ( UBaseType_t ) 0U )
 			{
 				vApplicationTickHook();
@@ -2594,11 +2603,12 @@ BaseType_t xSwitchRequired = pdFALSE;
 		}
 		#endif /* configUSE_TICK_HOOK */
 	}
-	else
+	else //调度器被挂起
 	{
 		++uxPendedTicks;
 
-		/* The tick hook gets called at regular intervals, even if the
+		/* 即使调度器被挂起，也使用滴答钩子函数
+		 * The tick hook gets called at regular intervals, even if the
 		scheduler is locked. */
 		#if ( configUSE_TICK_HOOK == 1 )
 		{
@@ -2609,6 +2619,7 @@ BaseType_t xSwitchRequired = pdFALSE;
 
 	#if ( configUSE_PREEMPTION == 1 )
 	{
+		//如果其它地方产生上下文切换标记，那么滴答过程一定产生上下文切换
 		if( xYieldPending != pdFALSE )
 		{
 			xSwitchRequired = pdTRUE;
@@ -3587,9 +3598,10 @@ TCB_t *pxTCB;
 		the maximum possible value so it is	extremely unlikely that the
 		if( xTickCount >= xNextTaskUnblockTime ) test will pass until
 		there is an item in the delayed list. */
+		//设置下一个阻塞时间为最大值，if( xTickCount >= xNextTaskUnblockTime ) 语句就会判断为假
 		xNextTaskUnblockTime = portMAX_DELAY;
 	}
-	else
+	else //延迟任务链表非空，更新阻塞时间
 	{
 		/* The new current delayed list is not empty, get the value of
 		the item at the head of the delayed list.  This is the time at
