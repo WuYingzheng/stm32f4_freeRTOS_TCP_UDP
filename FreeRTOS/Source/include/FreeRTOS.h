@@ -409,7 +409,7 @@ extern "C" {
 	#define configCHECK_FOR_STACK_OVERFLOW 0
 #endif
 
-/* The following event macros are embedded in the kernel API calls. */
+/* 下面的宏函数嵌入到了内核中了，用来调试跟踪 The following event macros are embedded in the kernel API calls. */
 
 //跟踪函数，将任务加入到就绪列表
 #ifndef traceMOVED_TASK_TO_READY_STATE
@@ -419,7 +419,7 @@ extern "C" {
 #ifndef tracePOST_MOVED_TASK_TO_READY_STATE
 	#define tracePOST_MOVED_TASK_TO_READY_STATE( pxTCB )
 #endif
-
+//队列的调试追踪函数
 #ifndef traceQUEUE_CREATE
 	#define traceQUEUE_CREATE( pxNewQueue )
 #endif

@@ -214,7 +214,9 @@ const TickType_t xValueOfInsertion = pxNewListItem->xItemValue;
 	( pxList->uxNumberOfItems )++;
 }
 /*-----------------------------------------------------------*/
-
+/*
+ * 移除链表中的一个实体
+ */
 UBaseType_t uxListRemove( ListItem_t * const pxItemToRemove )
 {
 /* The list item knows which list it is in.  Obtain the list from the list

@@ -2857,8 +2857,10 @@ void vTaskPlaceOnUnorderedEventList( List_t * pxEventList, const TickType_t xIte
 
 #endif /* configUSE_TIMERS */
 /*-----------------------------------------------------------*/
-
-BaseType_t xTaskRemoveFromEventList( const List_t * const pxEventList )
+/* 必须在临界区调用该函数
+ * 调用这个函数前必须检查链表非空，>--存在链表对象
+ */
+BaseType_t xTaskRemoveFromEventList( const List_t * const pxEventList )//顶层和底层const
 {
 TCB_t *pxUnblockedTCB;
 BaseType_t xReturn;
@@ -2866,7 +2868,8 @@ BaseType_t xReturn;
 	/* THIS FUNCTION MUST BE CALLED FROM A CRITICAL SECTION.  It can also be
 	called from a critical section within an ISR. */
 
-	/* The event list is sorted in priority order, so the first in the list can
+	/* 事件链表按照优先级排序，所以链表中的第一项拥有最高的优先级
+	 * The event list is sorted in priority order, so the first in the list can
 	be removed as it is known to be the highest priority.  Remove the TCB from
 	the delayed list, and add it to the ready list.
 
@@ -2885,14 +2888,14 @@ BaseType_t xReturn;
 		( void ) uxListRemove( &( pxUnblockedTCB->xStateListItem ) );
 		prvAddTaskToReadyList( pxUnblockedTCB );
 	}
-	else
+	else //调度器被挂起了
 	{
 		/* The delayed and ready lists cannot be accessed, so hold this task
 		pending until the scheduler is resumed. */
 		vListInsertEnd( &( xPendingReadyList ), &( pxUnblockedTCB->xEventListItem ) );
 	}
 
-	if( pxUnblockedTCB->uxPriority > pxCurrentTCB->uxPriority )
+	if( pxUnblockedTCB->uxPriority > pxCurrentTCB->uxPriority ) //检查是否需要上下文切换
 	{
 		/* Return true if the task removed from the event list has a higher
 		priority than the calling task.  This allows the calling task to know if

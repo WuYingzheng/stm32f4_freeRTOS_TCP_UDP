@@ -81,6 +81,7 @@ extern "C" {
 
 
 /**
+ * 返回队列的句柄，可以被其它的队列API引用
  * Type by which queues are referenced.  For example, a call to xQueueCreate()
  * returns an QueueHandle_t variable that can then be used as a parameter to
  * xQueueSend(), xQueueReceive(), etc.

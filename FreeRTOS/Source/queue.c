@@ -2,68 +2,6 @@
     FreeRTOS V9.0.0 - Copyright (C) 2016 Real Time Engineers Ltd.
     All rights reserved
 
-    VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
-
-    This file is part of the FreeRTOS distribution.
-
-    FreeRTOS is free software; you can redistribute it and/or modify it under
-    the terms of the GNU General Public License (version 2) as published by the
-    Free Software Foundation >>>> AND MODIFIED BY <<<< the FreeRTOS exception.
-
-    ***************************************************************************
-    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
-    >>!   distribute a combined work that includes FreeRTOS without being   !<<
-    >>!   obliged to provide the source code for proprietary components     !<<
-    >>!   outside of the FreeRTOS kernel.                                   !<<
-    ***************************************************************************
-
-    FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
-    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  Full license text is available on the following
-    link: http://www.freertos.org/a00114.html
-
-    ***************************************************************************
-     *                                                                       *
-     *    FreeRTOS provides completely free yet professionally developed,    *
-     *    robust, strictly quality controlled, supported, and cross          *
-     *    platform software that is more than just the market leader, it     *
-     *    is the industry's de facto standard.                               *
-     *                                                                       *
-     *    Help yourself get started quickly while simultaneously helping     *
-     *    to support the FreeRTOS project by purchasing a FreeRTOS           *
-     *    tutorial book, reference manual, or both:                          *
-     *    http://www.FreeRTOS.org/Documentation                              *
-     *                                                                       *
-    ***************************************************************************
-
-    http://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
-    the FAQ page "My application does not run, what could be wrong?".  Have you
-    defined configASSERT()?
-
-    http://www.FreeRTOS.org/support - In return for receiving this top quality
-    embedded software for free we request you assist our global community by
-    participating in the support forum.
-
-    http://www.FreeRTOS.org/training - Investing in training allows your team to
-    be as productive as possible as early as possible.  Now you can receive
-    FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
-    Ltd, and the world's leading authority on the world's leading RTOS.
-
-    http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
-    including FreeRTOS+Trace - an indispensable productivity tool, a DOS
-    compatible FAT file system, and our tiny thread aware UDP/IP stack.
-
-    http://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
-    Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
-
-    http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
-    Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
-    licenses offer ticketed support, indemnification and commercial middleware.
-
-    http://www.SafeRTOS.com - High Integrity Systems also provide a safety
-    engineered and independently SIL3 certified version for use in safety and
-    mission critical applications that require provable dependability.
-
     1 tab == 4 spaces!
 */
 
@@ -127,33 +65,42 @@ zero. */
  * Items are queued by copy, not reference.  See the following link for the
  * rationale: http://www.freertos.org/Embedded-RTOS-Queues.html
  */
+
+//队列结构体的头，用于维护队列信息
 typedef struct QueueDefinition
 {
+    // 指向队列存储区域起始地址 -> 队列的第一项
 	int8_t *pcHead;					/*< Points to the beginning of the queue storage area. */
+	// 指向队列存储区域结束地址
 	int8_t *pcTail;					/*< Points to the byte at the end of the queue storage area.  Once more byte is allocated than necessary to store the queue items, this is used as a marker. */
 	int8_t *pcWriteTo;				/*< Points to the free next place in the storage area. */
 
 	union							/* Use of a union is an exception to the coding standard to ensure two mutually exclusive structure members don't appear simultaneously (wasting RAM). */
 	{
+		//作为队列时指向最后一个出队项
 		int8_t *pcReadFrom;			/*< Points to the last place that a queued item was read from when the structure is used as a queue. */
+		//作为互斥变量，记录take的次数，递归计数
 		UBaseType_t uxRecursiveCallCount;/*< Maintains a count of the number of times a recursive mutex has been recursively 'taken' when the structure is used as a mutex. */
 	} u;
 
+	//因为等待入队而阻塞的任务，这些任务会被插入到等待链表
 	List_t xTasksWaitingToSend;		/*< List of tasks that are blocked waiting to post onto this queue.  Stored in priority order. */
+	//等待消息而阻塞的任务，这些任务会被插入到等待链表
 	List_t xTasksWaitingToReceive;	/*< List of tasks that are blocked waiting to read from this queue.  Stored in priority order. */
 
+	//当前队列的消息数
 	volatile UBaseType_t uxMessagesWaiting;/*< The number of items currently in the queue. */
-	UBaseType_t uxLength;			/*< The length of the queue defined as the number of items it will hold, not the number of bytes. */
-	UBaseType_t uxItemSize;			/*< The size of each items that the queue will hold. */
+	UBaseType_t uxLength;			/*< 队列可容纳的最大长度 The length of the queue defined as the number of items it will hold, not the number of bytes. */
+	UBaseType_t uxItemSize;			/*< 队列每一项的大小 The size of each items that the queue will hold. */
 
 	volatile int8_t cRxLock;		/*< Stores the number of items received from the queue (removed from the queue) while the queue was locked.  Set to queueUNLOCKED when the queue is not locked. */
 	volatile int8_t cTxLock;		/*< Stores the number of items transmitted to the queue (added to the queue) while the queue was locked.  Set to queueUNLOCKED when the queue is not locked. */
 
 	#if( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) )
-		uint8_t ucStaticallyAllocated;	/*< Set to pdTRUE if the memory used by the queue was statically allocated to ensure no attempt is made to free the memory. */
+		uint8_t ucStaticallyAllocated;	/*< 用来记录队列是否是静态分配的，不需要释放内存。Set to pdTRUE if the memory used by the queue was statically allocated to ensure no attempt is made to free the memory. */
 	#endif
 
-	#if ( configUSE_QUEUE_SETS == 1 )
+	#if ( configUSE_QUEUE_SETS == 1 )//队列管理
 		struct QueueDefinition *pxQueueSetContainer;
 	#endif
 
@@ -164,7 +111,8 @@ typedef struct QueueDefinition
 
 } xQUEUE;
 
-/* The old xQUEUE name is maintained above then typedefed to the new Queue_t
+/* 为了向下兼容，使用 typedef
+ * The old xQUEUE name is maintained above then typedefed to the new Queue_t
 name below to enable the use of older kernel aware debuggers. */
 typedef xQUEUE Queue_t;
 
@@ -275,10 +223,13 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength, const UBaseT
 	}														\
 	taskEXIT_CRITICAL()
 /*-----------------------------------------------------------*/
-
+/* 队列初始化时会被调用
+ * xNewQueue 传入的是一个布尔值
+ *
+ */
 BaseType_t xQueueGenericReset( QueueHandle_t xQueue, BaseType_t xNewQueue )
 {
-Queue_t * const pxQueue = ( Queue_t * ) xQueue;
+Queue_t * const pxQueue = ( Queue_t * ) xQueue;   顶层const
 
 	configASSERT( pxQueue );
 
@@ -287,22 +238,22 @@ Queue_t * const pxQueue = ( Queue_t * ) xQueue;
 		pxQueue->pcTail = pxQueue->pcHead + ( pxQueue->uxLength * pxQueue->uxItemSize );
 		pxQueue->uxMessagesWaiting = ( UBaseType_t ) 0U;
 		pxQueue->pcWriteTo = pxQueue->pcHead;
-		pxQueue->u.pcReadFrom = pxQueue->pcHead + ( ( pxQueue->uxLength - ( UBaseType_t ) 1U ) * pxQueue->uxItemSize );
+		pxQueue->u.pcReadFrom = pxQueue->pcHead + (  (pxQueue->uxLength-(UBaseType_t) 1U) * pxQueue->uxItemSize );  //指向他的前一项
 		pxQueue->cRxLock = queueUNLOCKED;
 		pxQueue->cTxLock = queueUNLOCKED;
 
-		if( xNewQueue == pdFALSE )
+		if( xNewQueue == pdFALSE )//判断是不是新队列
 		{
 			/* If there are tasks blocked waiting to read from the queue, then
 			the tasks will remain blocked as after this function exits the queue
 			will still be empty.  If there are tasks blocked waiting to write to
 			the queue, then one should be unblocked as after this function exits
 			it will be possible to write to it. */
-			if( listLIST_IS_EMPTY( &( pxQueue->xTasksWaitingToSend ) ) == pdFALSE )
+			if( listLIST_IS_EMPTY( &( pxQueue->xTasksWaitingToSend ) ) == pdFALSE ) //如果任务链表非空
 			{
 				if( xTaskRemoveFromEventList( &( pxQueue->xTasksWaitingToSend ) ) != pdFALSE )
 				{
-					queueYIELD_IF_USING_PREEMPTION();
+					queueYIELD_IF_USING_PREEMPTION();   //portYIELD 悬起系统调用服务
 				}
 				else
 				{
@@ -314,9 +265,9 @@ Queue_t * const pxQueue = ( Queue_t * ) xQueue;
 				mtCOVERAGE_TEST_MARKER();
 			}
 		}
-		else
+		else//这是一个新队列
 		{
-			/* Ensure the event queues start in the correct state. */
+			/* 初始化入队和出队的等待任务链表  Ensure the event queues start in the correct state. */
 			vListInitialise( &( pxQueue->xTasksWaitingToSend ) );
 			vListInitialise( &( pxQueue->xTasksWaitingToReceive ) );
 		}
@@ -382,13 +333,14 @@ Queue_t * const pxQueue = ( Queue_t * ) xQueue;
 /*-----------------------------------------------------------*/
 
 #if( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
-
+//第三个参数用来指定队列的类型，诸如信号量/互斥锁等
 	QueueHandle_t xQueueGenericCreate( const UBaseType_t uxQueueLength, const UBaseType_t uxItemSize, const uint8_t ucQueueType )
 	{
-	Queue_t *pxNewQueue;
-	size_t xQueueSizeInBytes;
+	Queue_t *pxNewQueue;        //队列在堆中的地址，并且作为句柄返回
+	size_t xQueueSizeInBytes;   //队列的大小（以字节为单位）
 	uint8_t *pucQueueStorage;
 
+		//队列长度需要大于0
 		configASSERT( uxQueueLength > ( UBaseType_t ) 0 );
 
 		if( uxItemSize == ( UBaseType_t ) 0 )
@@ -403,12 +355,13 @@ Queue_t * const pxQueue = ( Queue_t * ) xQueue;
 			xQueueSizeInBytes = ( size_t ) ( uxQueueLength * uxItemSize ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
 		}
 
+		//申请堆空间   队列信息头 + 队列项
 		pxNewQueue = ( Queue_t * ) pvPortMalloc( sizeof( Queue_t ) + xQueueSizeInBytes );
 
-		if( pxNewQueue != NULL )
+		if( pxNewQueue != NULL )//如果内存分配成功
 		{
 			/* Jump past the queue structure to find the location of the queue
-			storage area. */
+			storage area. 找到入队的地址*/
 			pucQueueStorage = ( ( uint8_t * ) pxNewQueue ) + sizeof( Queue_t );
 
 			#if( configSUPPORT_STATIC_ALLOCATION == 1 )
@@ -428,7 +381,8 @@ Queue_t * const pxQueue = ( Queue_t * ) xQueue;
 
 #endif /* configSUPPORT_STATIC_ALLOCATION */
 /*-----------------------------------------------------------*/
-
+//初始化一个新队列
+//最后一个参数是队列的句柄
 static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength, const UBaseType_t uxItemSize, uint8_t *pucQueueStorage, const uint8_t ucQueueType, Queue_t *pxNewQueue )
 {
 	/* Remove compiler warnings about unused parameters should
@@ -467,7 +421,7 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength, const UBaseT
 	}
 	#endif /* configUSE_QUEUE_SETS */
 
-	traceQUEUE_CREATE( pxNewQueue );
+	traceQUEUE_CREATE( pxNewQueue );    //调试追踪函数
 }
 /*-----------------------------------------------------------*/
 

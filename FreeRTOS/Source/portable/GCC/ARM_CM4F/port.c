@@ -152,8 +152,10 @@ debugger. */
 	#define portTASK_RETURN_ADDRESS	prvTaskExitError
 #endif
 
-/* Each task maintains its own interrupt status in the critical nesting variable. */
-//该变量在 xPortStartScheduler() 被初始化为0，内核的临界嵌套变量；如果配置了任务临界嵌套变量，每个任务会维护自己的临界嵌套变量
+/* Each task maintains its own interrupt status in the critical nesting variable.
+  该变量在 xPortStartScheduler() 被初始化为0，每进入一次临界区++，每退出一次临界区--，减到0时开启中断
+* 内核的临界嵌套变量；如果配置了任务临界嵌套变量，每个任务会维护自己的临界嵌套变量
+*/
 static UBaseType_t uxCriticalNesting = 0xaaaaaaaa;
 
 /*
@@ -463,9 +465,9 @@ void vPortEnterCritical( void )
 	functions that end in "FromISR" can be used in an interrupt.  Only assert if
 	the critical nesting count is 1 to protect against recursive calls if the
 	assert function also uses a critical section. */
-	if( uxCriticalNesting == 1 )
+	if( uxCriticalNesting == 1 ) //如果该函数在中断中被调用，之前没有进入临界嵌套区，那么之前 uxCriticalNesting==0
 	{
-		configASSERT( ( portNVIC_INT_CTRL_REG & portVECTACTIVE_MASK ) == 0 );
+		configASSERT( ( portNVIC_INT_CTRL_REG & portVECTACTIVE_MASK ) == 0 ); //不应该有中断激活标志
 	}
 }
 /*-----------------------------------------------------------*/

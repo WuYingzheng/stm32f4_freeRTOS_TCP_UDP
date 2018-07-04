@@ -229,7 +229,7 @@ BaseType_t xReturn;
 }
 
 /*-----------------------------------------------------------*/
-
+//禁止中断
 portFORCE_INLINE static void vPortRaiseBASEPRI( void )
 {
 uint32_t ulNewBASEPRI;
@@ -265,7 +265,7 @@ uint32_t ulOriginalBASEPRI, ulNewBASEPRI;
 	return ulOriginalBASEPRI;
 }
 /*-----------------------------------------------------------*/
-
+//开启中断
 portFORCE_INLINE static void vPortSetBASEPRI( uint32_t ulNewMaskValue )
 {
 	__asm volatile
